@@ -1,0 +1,19 @@
+{
+  "name": "tLLWtG Blog",
+  "short_name": "LLW",
+  "description": "About an engineer & designer who loves web.",
+  "icons": [{
+    "src": "icons/white-128.jpg",
+    "sizes": "128x128",
+    "type": "image/jpg"
+  }, {
+    "src": "icons/white-512.jpg",
+    "sizes": "512x512",
+    "type": "image/jpg"
+  }],
+  "background_color": "#fff",
+  "theme_color": "#000",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait"
+}
