@@ -4,18 +4,18 @@
 #
 # Modified by tLLWtG
 
-title: tLLWtG Blog
-SEOTitle: tLLWtG Blog | tLLWtG 的博客
+title: Sliverkiss Blog
+SEOTitle: Sliverkiss Blog | Sliverkiss 的博客
 # bg changed to random
 header-img: img/home-bg.jpg
-email: tllwtg@gmail.com
-description: "这里是 tLLWtG 的个人博客，与你一起发现更大的世界 | 要做一个有 swag 的程序员"
-keyword: "tLLWtG, tLLWtG 的博客, tLLWtG Blog, 博客, 个人网站, 互联网, Web"
+email: tistzach@gmail.com
+description: "这里是 Sliverkiss 的个人博客，与你一起发现更大的世界 | 要做一个有 swag 的程序员"
+keyword: "Sliverkiss, Sliverkiss 的博客, Sliverkiss Blog, 博客, 个人网站, 互联网, Web"
 url: "https://tllwtg.top" # your host, for absolute URL
 baseurl: "" # for example, '/blog' if your blog hosted on 'host/blog'
 
 # start-time (yyyy-mm-dd)
-start_time: "2022-08-24"
+start_time: "2023-05-17"
 
 # Publish posts or collection documents with a future date.
 future: true
@@ -23,9 +23,9 @@ future: true
 # SNS settings
 RSS: true
 # weibo_username: tLLWtG
-zhihu_username: tllwtg
-github_username: tLLWtG
-twitter_username: tLLWtG1
+# zhihu_username: tllwtg
+github_username: Sliverkiss
+# twitter_username: Sliverkiss
 #facebook_username:  huxpro
 #linkedin_username:  firstname-lastname-idxxxx
 
