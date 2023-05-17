@@ -1,0 +1,14 @@
+---
+layout:     post
+title:      "Hello world"
+subtitle:   " \"一段崭新生活的开始!\""
+date:       2023-05-17 0:00
+author:     "sliverkiss"
+header-img: "img/ICPC-bg.png"
+header-mask: 0.3
+catalog: true
+tags: 
+- CP
+---
+
+###生活
