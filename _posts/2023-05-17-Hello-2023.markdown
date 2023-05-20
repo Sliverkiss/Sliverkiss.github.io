@@ -8,7 +8,7 @@ header-img: "img/bg/image_7.jpg"
 header-mask: 0.3
 catalog: true
 tags: 
-- Life
+- CP
 ---
 
 ### 生活
