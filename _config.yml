@@ -4,13 +4,13 @@
 #
 # Modified by tLLWtG
 
-title: Sliverkiss Blog
+title: tLLWtG Blog
 SEOTitle: Sliverkiss Blog | Sliverkiss 的博客
 # bg changed to random
 header-img: img/home-bg.jpg
 email: tistzach@gmail.com
-description: "这里是 Sliverkiss 的个人博客，与你一起发现更大的世界 | 要做一个有 swag 的程序员"
-keyword: "Sliverkiss, Sliverkiss 的博客, Sliverkiss Blog, 博客, 个人网站, 互联网, Web"
+description: "这里是 Sliverkiss 的个人博客，与你一起发现更大的世界 | 相遇即是缘分～"
+keyword: "tLLWtG, tLLWtG 的博客, tLLWtG Blog, 博客, 个人网站, 互联网, Web"
 url: "https://sliverkiss.github.io" # your host, for absolute URL
 baseurl: "" # for example, '/blog' if your blog hosted on 'host/blog'
 
@@ -22,10 +22,10 @@ future: true
 
 # SNS settings
 RSS: true
-# weibo_username: 
-# zhihu_username: 
-github_username: [Sliverkiss](https://github.com/Sliverkiss)
-# twitter_username: Sliverkiss
+# weibo_username: tLLWtG
+# zhihu_username: tllwtg
+github_username: [Sliverkiss](https://www.github.com/sliverkiss)
+# twitter_username: tistzach
 #facebook_username:  huxpro
 #linkedin_username:  firstname-lastname-idxxxx
 
