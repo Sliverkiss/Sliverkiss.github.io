@@ -115,4 +115,4 @@ friends:
 # added sitemap
 plugins:
   - jekyll-sitemap
-  - jekyll-paginate
+ # - jekyll-paginate
