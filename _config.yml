@@ -4,29 +4,29 @@
 #
 # Modified by tLLWtG
 
-title: tLLWtG Blog
-SEOTitle: tLLWtG Blog | tLLWtG 的博客
+title: Sliverkiss Blog
+SEOTitle: Sliverkiss Blog | Sliverkiss 的博客
 # bg changed to random
-header-img: img/home-bg.jpg
-email: tllwtg@gmail.com
-description: "这里是 tLLWtG 的个人博客，与你一起发现更大的世界 | 要做一个有 swag 的程序员"
-keyword: "tLLWtG, tLLWtG 的博客, tLLWtG Blog, 博客, 个人网站, 互联网, Web"
-url: "https://tllwtg.top" # your host, for absolute URL
+header-img: img/header_ic.jpg
+email: tistzach@gmail.com
+description: "这里是 Sliverkiss 的个人博客，与你一起发现更大的世界 | 相遇即是缘分～"
+keyword: "Sliverkiss, Sliverkiss 的博客, Sliverkiss Blog, 博客, 个人网站, 互联网, Web"
+url: "https://sliverkiss.github.io" # your host, for absolute URL
 baseurl: "" # for example, '/blog' if your blog hosted on 'host/blog'
 
 # start-time (yyyy-mm-dd)
-start_time: "2022-08-24"
+start_time: "2023-05-17"
 
 # Publish posts or collection documents with a future date.
 future: true
 
 # SNS settings
 RSS: true
-# weibo_username: tLLWtG
-zhihu_username: tllwtg
-github_username: tLLWtG
-twitter_username: tLLWtG1
-#facebook_username:  huxpro
+# weibo_username: 
+# zhihu_username: 
+github_username: sliverkiss
+# twitter_username: 
+#facebook_username:  
 #linkedin_username:  firstname-lastname-idxxxx
 
 # Build settings
@@ -87,8 +87,8 @@ netease_comment: false
 
 # Sidebar settings
 sidebar: true # whether or not using Sidebar.
-sidebar-about-description: "要做一个有 swag 的程序员 <br>"
-sidebar-avatar: https://avatars.githubusercontent.com/u/63890132 # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-about-description: "一名乐观的网安爱好者❤ <br>"
+sidebar-avatar: https://avatars.githubusercontent.com/u/70052878 # use absolute URL, seeing it's used in both `/` and `/about/`
 
 # Featured Tags
 featured-tags: true # whether or not using Feature-Tags
