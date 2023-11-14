@@ -1,0 +1,38 @@
+---
+layout:     post
+title:      "Hello World"
+subtitle:   " \"Hello World and hello to you\""
+date:       2023-11-14 17:00:00
+author:     "Sliverkiss"
+header-img: "img/bg/image_1.jpg"
+catalog: true
+tags:
+    - Life
+---
+
+> “If you care about me at all, please don't say anything to anyone. ”
+
+
+Hello~欢迎各位来到我的博客。这里是我的第一篇文章。
+
+## 正文
+
+2333～这其实是一个很迷的博客。因为，这个博客是用来进行各种各样的、我没有经历的事情而实验的。
+
+在这里，也许你会被治愈好患病多年的眼疾。因为，你会被里面的内容闪瞎（~~看到这里，估计你也已是一只在黑暗中追求光名，最终扑火的飞蛾了吧！~~）
+
+在这里，也许你多年的聋哑，将会不治而治。因为你看到的，所看到的一切，都会令你的脑洞大开。
+
+开玩笑的啦！~~虽说这不是开玩笑的时。~~
+
+
+<p id = "build"></p>
+
+## 致谢
+
+本博客的搭建主要来源于[tllwtg](https://github.com/tLLWtG)的[项目](https://github.com/tLLWtG/tllwtg.github.io)。
+
+
+
+
+<!-- *———      __ 后记于 __* -->
