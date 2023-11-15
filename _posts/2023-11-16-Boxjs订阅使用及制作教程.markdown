@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      "Boxjs 订阅使用及制作教程"
-subtitle:   " \"Hello World and hello to you\""
+subtitle:   " \"记录一次简易的Boxjs订阅使用及制作教程\""
 date:       2023-11-16 14:00:00
 author:     "Sliverkiss"
 header-img: "img/bg/image_3.jpg"
@@ -21,10 +21,10 @@ tags:
 1. [小豆苗 App 签到脚本](https://raw.githubusercontent.com/wf021325/qx/master/task/xdm.js) by 苍井灰灰
 2. [天翼云盘签到脚本](https://raw.githubusercontent.com/MCdasheng/QuantumultX/main/Scripts/myScripts/ty.js) by Mcdasheng
 
-##### 过程
+##### 创建模版文件
 
 首先，创建一个后缀为 json 格式的文件，作为 boxjs 订阅的主要来源。模版如下：
-```js
+```
 {
   “id”:”订阅id，随便写一个”,
   “name”:”订阅名称”,
@@ -71,7 +71,7 @@ tags:
 ![小豆苗app](../../../../img/boxjs/image_1.jpg "title")
 
 通过上图我们得知，`$.getdata` 里面的内容是`_key`, 寻找`_key` 对应的字符串就是 “XDM_Header”。因此，该脚本所需要的环境变量名称为 `XDM_Header`，在 `keys` 中填写环境变量，以及相关信息。
-```js
+```
  ”keys”:[“XDM_Header”],
     “descs_html”:[“打开客户端即可获取cookie”],
     ”setting”:[
@@ -92,7 +92,7 @@ tags:
 
 如图所示，该脚本所需要的环境变量名称为 `ty_session`，在 keys 中填写环境变量，以及相关信息.
 
-```js
+```
  ”keys”:[“ty_session”],
     “descs_html”:[“天翼云盘获取session”],
     ”setting”:[
@@ -108,17 +108,15 @@ tags:
 ```
 ##### 环境变量的使用教程
 
-一般来说，我的脚本注释通常都会有将 `XXX` 填写到 `XXX` 的描述，我会在这里演示一遍具体的操作流程，希望大家能够学会。
-
-例如`松鼠 ios` 的签到脚本：找到 `cookie`，填写到 `sxios_data`, 多账号用 `@`分割
+一般来说，我的脚本注释通常都会有将 `XXX` 填写到 `XXX` 的描述，我会在这里演示一遍具体的操作流程，希望大家能够学会。例如`松鼠 ios` 的签到脚本：找到 `cookie`，填写到 `sxios_data`, 多账号用 `@`分割。
 
 首先打开 `boxjs`，点击我的。
 
-![说明](../../../../img/boxjs/image_3.jpg "title")
+![说明](../../../../img/boxjs/image_3.png "title")
 
 点击数据查看器，在数据键输入 `sxios_data`, 点击 `VIEW`s 查看具体内容，此时看到的数据为空。
 
-![说明](../../../../img/boxjs/image_4.jpg "title")
+![说明](../../../../img/boxjs/image_4.png "title")
 
 在数据内容输入你抓到的 `cookie` 信息，如果有多个账号，就用 `@`拼接，如 `cookie@cookie@cookie`, 最后点击保存。此时再运行脚本就不会出现未找到环境变量等问题了。
 
