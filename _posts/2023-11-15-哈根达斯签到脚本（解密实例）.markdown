@@ -1,0 +1,186 @@
+---
+layout:     post
+title:      "哈根达斯签到脚本（解密实例）"
+subtitle:   " \"Hello World and hello to you\""
+date:       2023-11-15 14:00:00
+author:     "Sliverkiss"
+header-img: "img/bg/image_1.jpg"
+catalog: true
+tags:
+    - Code
+---
+
+> “If you care about me at all, please don't say anything to anyone. ”
+
+##### 简介
+
+本文主要记录一次哈根达斯会员中心（微信小程序）的解密过程。
+
+##### 过程
+
+首先对哈根达斯的微信小程序进行解包，可以使用网上现成的工具，如`wxappUnpacker`。通过使用`wxappUnpacker`这个工具可以解手机微信的包。Pc 的微信包则需要先解密一下，再用`wxappUnpacker`解。这个解包，很多时候并不完美，不能搞到微信开发者工具调试，大概就是静态分析，研究一下代码内容。
+
+解包后找到的 JS 文件如下：[appservice.js](https://t.me/NobyDa_Chat/1501857)
+
+根据以往的经验来看，哈根达斯应该是双层 `MD5`，即`MD5 (MD5 (a + MD5 (c, d)))`。在以上的 JS 随便搜索`sign:`, 任意找一处即可，得到一个方法`l.default.mdString`。
+
+![图片说明](../../../../img/hgds/image_1.jpg "title")
+
+再搜索`mdString`关键词，找到`mdString`开头的方法，这个关键词比较多,有 100 多个，只有开头这个才是，这里大概就是加密算法了。
+
+![图片说明](../../../../img/hgds/image_2.jpg "title")
+
+此时我们得到加密关键字`hexMD5`，目测就是加密算法。
+
+根据查询到的结果得知，`var h = u.default.hexMD5 (o, "cs");`，`hexMD5`加密方法中有一个`o`变量。
+
+再次通过关键词`o`查找代码，发现`o = "Z15" + getApp ().globalData.keyinfo;`。通过解读代码得知，还需要找到`etApp ().globalData.keyinfo`。
+
+那么，尝试一下使用关键词`keyinfo`进行搜索,找到`keyinfo=‘$$ABCD&`。
+
+最后将`getApp ().globalData.keyinfo;`替换成`$$ABCD&`,得到`o="Z15$$ABCD&"`
+
+![图片说明](../../../../img/hgds/image_3.jpg "title")
+
+此时再看代码`var h = u.default.hexMD5 (o, "cs")`，将`o`替换成`“Z15$$ABCD&”`,就是`var h = u.default.hexMD5 (“Z15$$ABCD&”, "cs")`
+
+![图片说明](../../../../img/hgds/image_4.jpg "title")
+
+接下来就是抠代码过程，经过一番代码解析后发现，这个`hexMD5`可以完美的抠出来。计算得到 `c36b51abb26c3357cb00ef4c6e235a45`。
+
+![图片说明](../../../../img/hgds/image_5.jpg "title")
+
+经过测试，这个是标准的 hexMD5, 其中有两个参数并不是很清楚，但之前见过。只传入第一个参数，第二个参数忽略计算结果就是我们常用的 `MD5`。 剩下的应该靠猜就行了
+
+`return u.default.hexMD5 (u.default.hexMD5 (Array.from (i).sort ().join ("")) +","+ h)`精简后大概就是`return hexMD5 (hexMD5 (aaaaa) +"," + “c36b51abb26c3357cb00ef4c6e235a45”)`
+
+这里的 `aaaaa` 大概就是从提交 `body` 抓包得到的 `json`, 把 `json` 转为 `a=1&b=2&c=3` 的格式，具体需不需要按 `a~z` 顺序排列还不清楚。
+
+至于怎么抠这个 `MD5`，关键字，搜`hexMD5`找到`hexMD5`开头的，经过实测，上面的方法`n`、`r`、`i`、`o`、`a`、`s`也需要。
+
+![图片说明](../../../../img/hgds/image_6.jpg "title")
+
+将`n`、`r`、`i`、`o`、`a`、`s`方法提取出来，再将`hexMD5`放到 `function`后面，就能得到图中的代码。
+
+此时这个`hexMD5`已经可以正常调用。调用方法`hexMD5 (e,t)`中的参数`t`根据情况可以不用。
+
+具体`h = u.default.hexMD5 (o, "cs")`这里需要两个参数。
+
+代码`return u.default.hexMD5 (u.default.hexMD5 (Array.from (i).sort ().join ("")) +"," + h)`需要一个参数。
+
+![图片说明](../../../../img/hgds/image_7.jpg "title")
+
+一开始找到这个 `AES`，不知道是用来加密什么。经过研究分析，发现 `sessionKey` 是 `AES-ECB` 密钥 `sinobase@1234567`。但是解密出来，也没意义。
+
+![图片说明](../../../../img/hgds/image_7.jpg "title")
+
+`sessionKey` 从代码里面可以看出，它是从内存进行读取之类的，只要不清理小程序缓存就没事，清理缓存后就变了。
+
+![图片说明](../../../../img/hgds/image_8.jpg "title")
+
+![图片说明](../../../../img/hgds/image_9.jpg "title")
+
+最后，将上面找到的有用信息进行整合，整理出用来解密签到 `sign` 的算法如下：
+
+```js
+function n(n, r) {
+    var o = (65535 & n) + (65535 & r);
+    return (n >> 16) + (r >> 16) + (o >> 16) << 16 | 65535 & o
+}
+function r(r, o, t, a, e, i) {
+    return n(function (n, r) {
+        return n << e | n >>> 32 - e
+    }(n(n(o, r), n(a, i))), t)
+}
+function i(n, o, t, a, e, i, c) {
+    return r(o & t | ~o & a, n, o, e, i, c)
+}
+function o(n, o, t, a, e, i, c) {
+    return r(o & a | t & ~a, n, o, e, i, c)
+}
+function a(n, o, t, a, e, i, c) {
+    return r(o ^ t ^ a, n, o, e, i, c)
+}
+function s(n, o, t, a, e, i, c) {
+    return r(t ^ (o | ~a), n, o, e, i, c)
+}
+function hexMD5(r, t) {
+    return function (n) {
+        for (var r = "",
+            o = 0; o < 4 * n.length; o++) r += "0123456789abcdef".charAt(n[o >> 2] >> o % 4 * 8 + 4 & 15) + "0123456789abcdef".charAt(n[o >> 2] >> o % 4 * 8 & 15);
+        return r
+    }(function (r) {
+        for (var t = 1732584193,
+            e = -271733879,
+            c = -1732584194,
+            u = 271733878,
+            f = 0; f < r.length; f += 16) {
+            var h = t,
+                d = e,
+                b = c,
+                g = u;
+            t = s(t = a(t = a(t = a(t = a(t = o(t = o(t = o(t = o(t = i(t = i(t = i(t = i(t, e, c, u, r[f + 0], 7, -680876936), e = i(e, c = i(c, u = i(u, t, e, c, r[f + 1], 12, -389564586), t, e, r[f + 2], 17, 606105819), u, t, r[f + 3], 22, -1044525330), c, u, r[f + 4], 7, -176418897), e = i(e, c = i(c, u = i(u, t, e, c, r[f + 5], 12, 1200080426), t, e, r[f + 6], 17, -1473231341), u, t, r[f + 7], 22, -45705983), c, u, r[f + 8], 7, 1770035416), e = i(e, c = i(c, u = i(u, t, e, c, r[f + 9], 12, -1958414417), t, e, r[f + 10], 17, -42063), u, t, r[f + 11], 22, -1990404162), c, u, r[f + 12], 7, 1804603682), e = i(e, c = i(c, u = i(u, t, e, c, r[f + 13], 12, -40341101), t, e, r[f + 14], 17, -1502002290), u, t, r[f + 15], 22, 1236535329), c, u, r[f + 1], 5, -165796510), e = o(e, c = o(c, u = o(u, t, e, c, r[f + 6], 9, -1069501632), t, e, r[f + 11], 14, 643717713), u, t, r[f + 0], 20, -373897302), c, u, r[f + 5], 5, -701558691), e = o(e, c = o(c, u = o(u, t, e, c, r[f + 10], 9, 38016083), t, e, r[f + 15], 14, -660478335), u, t, r[f + 4], 20, -405537848), c, u, r[f + 9], 5, 568446438), e = o(e, c = o(c, u = o(u, t, e, c, r[f + 14], 9, -1019803690), t, e, r[f + 3], 14, -187363961), u, t, r[f + 8], 20, 1163531501), c, u, r[f + 13], 5, -1444681467), e = o(e, c = o(c, u = o(u, t, e, c, r[f + 2], 9, -51403784), t, e, r[f + 7], 14, 1735328473), u, t, r[f + 12], 20, -1926607734), c, u, r[f + 5], 4, -378558), e = a(e, c = a(c, u = a(u, t, e, c, r[f + 8], 11, -2022574463), t, e, r[f + 11], 16, 1839030562), u, t, r[f + 14], 23, -35309556), c, u, r[f + 1], 4, -1530992060), e = a(e, c = a(c, u = a(u, t, e, c, r[f + 4], 11, 1272893353), t, e, r[f + 7], 16, -155497632), u, t, r[f + 10], 23, -1094730640), c, u, r[f + 13], 4, 681279174), e = a(e, c = a(c, u = a(u, t, e, c, r[f + 0], 11, -358537222), t, e, r[f + 3], 16, -722521979), u, t, r[f + 6], 23, 76029189), c, u, r[f + 9], 4, -640364487), e = a(e, c = a(c, u = a(u, t, e, c, r[f + 12], 11, -421815835), t, e, r[f + 15], 16, 530742520), u, t, r[f + 2], 23, -995338651), c, u, r[f + 0], 6, -198630844),e = s(e = s(e = s(e = s(e, c = s(c, u = s(u, t, e, c, r[f + 7], 10, 1126891415), t, e, r[f + 14], 15, -1416354905), u, t, r[f + 5], 21, -57434055), c = s(c, u = s(u, t = s(t, e, c, u, r[f + 12], 6, 1700485571), e, c, r[f + 3], 10, -1894986606), t, e, r[f + 10], 15, -1051523), u, t, r[f + 1], 21, -2054922799), c = s(c, u = s(u, t = s(t, e, c, u, r[f + 8], 6, 1873313359), e, c, r[f + 15], 10, -30611744), t, e, r[f + 6], 15, -1560198380), u, t, r[f + 13], 21, 1309151649), c = s(c, u = s(u, t = s(t, e, c, u, r[f + 4], 6, -145523070), e, c, r[f + 11], 10, -1120210379), t, e, r[f + 2], 15, 718787259), u, t, r[f + 9], 21, -343485551),
+                t = n(t, h),
+                e = n(e, d),
+                c = n(c, b),
+                u = n(u, g)
+        }
+        return [t, e, c, u]
+    }(function (n) {
+        for (var r = 1 + (n.length + 8 >> 6), o = new Array(16 * r), t = 0; t < 16 * r; t++) o[t] = 0;
+        for (t = 0; t < n.length; t++) o[t >> 2] |= (255 & n.charCodeAt(t)) << t % 4 * 8;
+        return o[t >> 2] |= 128 << t % 4 * 8,
+            o[16 * r - 2] = 8 * n.length,
+            o
+    }(t ? "key=@D#D" + r : r)))
+}
+
+function mdString(n, r) {
+    for (var o = JSON.parse(r), t = {
+        unionId: o.unionId,
+        openId: o.openId,
+        sessionKey: o.sessionKey
+    },
+        a = "", e = 0, i = Object.keys(t); e < i.length; e++) {
+        var c = i[e];
+        a += "".concat(c, "=").concat(t[c], "&")
+    }
+    return a += "timestamp=".concat(n),
+        hexMD5(hexMD5(Array.from(a).sort().join("")) + ",c36b51abb26c3357cb00ef4c6e235a45")
+}
+```
+
+使用方法如下：
+
+比如抓包签到 body
+```js
+body = '{"unionId":"xxxx","openId":"xxx","socialHubid":"xx","timestamp":1694946869950,"sign":"xxx","sessionKey":"xxxx"}';
+```
+ 那么
+```
+timestamp = 1694946869950;// 可以是数字，可以是文本，从上面获得
+```
+用这整个 `body` 丢进去，还有这个时间戳，就能对比 `sign` 了。从下图可以看出，`body` 中的 `sign` 值和用算法生成的 `sign` 是一致的。
+```js
+sign = mdString(timestamp,body);
+```
+
+至此，整个哈根达斯解密大功告成。
+
+![图片说明](../../../../img/hgds/image_10.jpg "title")
+##### 后记
+
+教学类型文章不可避免会有一些专业性，整个教程内容均由`苍井灰灰`大佬口述，本人整理记录，难以避免行文段落中存在上下文衔接不连贯、内容晦涩难懂等问题，还望多多包涵。
+
+俗话说：授人以鱼不如授人以渔，授之以渔可解一生之需。
+
+祝大家学成归来。
+
+
+
+
+
+
+
+
+<!-- *———      __ 后记于 __* -->
