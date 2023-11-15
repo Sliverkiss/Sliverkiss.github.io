@@ -36,15 +36,16 @@ tags:
 
 再次通过关键词`o`查找代码，发现`o = "Z15" + getApp ().globalData.keyinfo;`。通过解读代码得知，还需要找到`etApp ().globalData.keyinfo`。
 
+![图片说明](../../../../img/hgds/image_3.jpg "title")
+
 那么，尝试一下使用关键词`keyinfo`进行搜索,找到`keyinfo=‘$$ABCD&`。
+
+![图片说明](../../../../img/hgds/image_4.jpg "title")
 
 最后将`getApp ().globalData.keyinfo;`替换成`$$ABCD&`,得到`o="Z15$$ABCD&"`
 
-![图片说明](../../../../img/hgds/image_3.jpg "title")
-
 此时再看代码`var h = u.default.hexMD5 (o, "cs")`，将`o`替换成`“Z15$$ABCD&”`,就是`var h = u.default.hexMD5 (“Z15$$ABCD&”, "cs")`
 
-![图片说明](../../../../img/hgds/image_4.jpg "title")
 
 接下来就是抠代码过程，经过一番代码解析后发现，这个`hexMD5`可以完美的抠出来。计算得到 `c36b51abb26c3357cb00ef4c6e235a45`。
 
