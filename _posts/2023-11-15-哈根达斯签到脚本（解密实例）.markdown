@@ -150,17 +150,17 @@ function mdString(n, r) {
 }
 ```
 
-使用方法如下：
+##### 使用方法
 
 比如抓包签到 body
 ```js
 body = '{"unionId":"xxxx","openId":"xxx","socialHubid":"xx","timestamp":1694946869950,"sign":"xxx","sessionKey":"xxxx"}';
 ```
- 那么
+ 时间戳
 ```
 timestamp = 1694946869950;// 可以是数字，可以是文本，从上面获得
 ```
-用这整个 `body` 丢进去，还有这个时间戳，就能对比 `sign` 了。从下图可以看出，`body` 中的 `sign` 值和用算法生成的 `sign` 是一致的。
+将 `body`与`timestamp`作为参数传入解密算法，通过`console.log()`打印便能对比 `sign` 。从下图可以看出，`body` 中的 `sign` 值和用算法生成的 `sign` 是一致的。
 ```js
 sign = mdString(timestamp,body);
 ```
@@ -168,6 +168,7 @@ sign = mdString(timestamp,body);
 至此，整个哈根达斯解密大功告成。
 
 ![图片说明](../../../../img/hgds/image_10.jpg "title")
+
 ##### 后记
 
 教学类型文章不可避免会有一些专业性，整个教程内容均由`苍井灰灰`大佬口述，本人整理记录，难以避免行文段落中存在上下文衔接不连贯、内容晦涩难懂等问题，还望多多包涵。
