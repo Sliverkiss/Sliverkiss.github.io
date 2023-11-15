@@ -33,7 +33,7 @@ github_username: sliverkiss
 # from 2016, 'pygments' is unsupported on GitHub Pages. Use 'rouge' for highlighting instead.
 highlighter: rouge
 permalink: pretty
-paginate: 7
+paginate: 10
 exclude:
   [
     "less",
@@ -69,7 +69,7 @@ kramdown:
       start_line: 1
 
 # Disqus settings edited
-#disqus_username: hux
+disqus_username: disqus_abdIyoN3gU
 
 # giscus
 giscus: true
@@ -87,7 +87,7 @@ netease_comment: false
 
 # Sidebar settings
 sidebar: true # whether or not using Sidebar.
-sidebar-about-description: "一名乐观的网安爱好者❤ <br>"
+sidebar-about-description: "Life is simple,me too❤ <br>"
 sidebar-avatar: https://avatars.githubusercontent.com/u/70052878 # use absolute URL, seeing it's used in both `/` and `/about/`
 
 # Featured Tags
