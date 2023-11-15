@@ -52,8 +52,13 @@ tags:
 ![图片说明](../../../../img/hgds/image_5.jpg "title")
 
 经过测试，这个是标准的 hexMD5, 其中有两个参数并不是很清楚，但之前见过。只传入第一个参数，第二个参数忽略计算结果就是我们常用的 `MD5`。 剩下的应该靠猜就行了
-
-`return u.default.hexMD5 (u.default.hexMD5 (Array.from (i).sort ().join ("")) +","+ h)`精简后大概就是`return hexMD5 (hexMD5 (aaaaa) +"," + “c36b51abb26c3357cb00ef4c6e235a45”)`
+```js
+return u.default.hexMD5 (u.default.hexMD5 (Array.from (i).sort ().join ("")) +","+ h)
+```
+精简后大概就是
+```js
+return hexMD5 (hexMD5 (aaaaa) +"," + “c36b51abb26c3357cb00ef4c6e235a45”)
+```
 
 这里的 `aaaaa` 大概就是从提交 `body` 抓包得到的 `json`, 把 `json` 转为 `a=1&b=2&c=3` 的格式，具体需不需要按 `a~z` 顺序排列还不清楚。
 
@@ -61,13 +66,16 @@ tags:
 
 ![图片说明](../../../../img/hgds/image_6.jpg "title")
 
-将`n`、`r`、`i`、`o`、`a`、`s`方法提取出来，再将`hexMD5`放到 `function`后面，就能得到图中的代码。
+将`n`、`r`、`i`、`o`、`a`、`s`方法提取出来，再将`hexMD5`放到 `function`后面，就能得到图中的代码。此时这个`hexMD5`已经可以正常调用。而调用方法`hexMD5 (e,t)`中的参数`t`根据情况可以忽略不用。具体如下:
 
-此时这个`hexMD5`已经可以正常调用。调用方法`hexMD5 (e,t)`中的参数`t`根据情况可以不用。
-
-具体`h = u.default.hexMD5 (o, "cs")`这里需要两个参数。
-
-代码`return u.default.hexMD5 (u.default.hexMD5 (Array.from (i).sort ().join ("")) +"," + h)`需要一个参数。
+这里需要两个参数。
+```js
+h = u.default.hexMD5 (o, "cs")
+```
+而下面代码需要一个参数。
+```js
+return u.default.hexMD5 (u.default.hexMD5 (Array.from (i).sort ().join ("")) +"," + h)
+```
 
 ![图片说明](../../../../img/hgds/image_7.jpg "title")
 
