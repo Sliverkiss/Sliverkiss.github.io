@@ -1,0 +1,140 @@
+---
+layout:     post
+title:      "Boxjs 订阅使用及制作教程"
+subtitle:   " \"Hello World and hello to you\""
+date:       2023-11-16 14:00:00
+author:     "Sliverkiss"
+header-img: "img/bg/image_3.jpg"
+catalog: true
+tags:
+    - Code
+---
+
+> “If you care about me at all, please don't say anything to anyone. ”
+
+##### 前言
+
+有些小白只知道通过脚本和`boxjs`订阅复合使用。一旦没有了`boxjs`订阅，便不知道该如何管理脚本的环境变量。为让各位更好地了解`Boxjs`，我决定抽空写一份使用以及制作`boxjs`订阅的教程。
+
+在本次教程中，将会使用到以下脚本作为参考案例：
+
+1. [小豆苗 App 签到脚本](https://raw.githubusercontent.com/wf021325/qx/master/task/xdm.js) by 苍井灰灰
+2. [天翼云盘签到脚本](https://raw.githubusercontent.com/MCdasheng/QuantumultX/main/Scripts/myScripts/ty.js) by Mcdasheng
+
+##### 过程
+
+首先，创建一个后缀为 json 格式的文件，作为 boxjs 订阅的主要来源。模版如下：
+```js
+{
+  “id”:”订阅id，随便写一个”,
+  “name”:”订阅名称”,
+  “author”:”订阅作者”,
+  ”repo”:”来源仓库地址”,
+  //下面的apps就是主要的应用订阅
+  ”apps”:[
+  {
+    “id”:”应用id(通常使用应用名称简写,如天翼云盘:tyyp)”,
+    ”name”:“应用名称”,
+    ”script”:”脚本地址”,
+    ”author”:”脚本作者”,
+    ”repo”:“脚本来源仓库”,
+    ”icons”:[
+      “图标地址”,
+      ”图标地址”
+    ],
+    ”keys”:[“环境变量”],
+    “descs_html”:[“操作步骤介绍”],
+    ”setting”:[
+    {
+      “id”:”环境变量”,
+      ”name”:”变量名称备注”,
+      //默认值，一半留空
+      ”val”:””,
+      ”type”:”textarea”，
+      “desc”:”环境变量介绍”
+    },
+    //如有多个变量则在keys中填入，并复制上面setting中的内容重复填写
+    ]
+  },
+  //多个应用变量同理，复制对象填写。
+  ]
+}
+```
+如果上面的模版还是看不懂，可以参考其他作者写的[boxjs订阅](https://raw.githubusercontent.com/chiupam/surge/main/boxjs/chiupam.boxjs.json)
+
+##### 实战过程
+
+接下来我们进入实战，根据脚本内容制作对应的 `boxjs` 应用订阅。
+
+首先是`苍井灰灰`大佬的`小豆苗` app 脚本，通过查看脚本内容，寻找 `$.getdata`、`$.setdata`、`$.read` 等关键字段。
+
+![小豆苗app](../../../../img/boxjs/image_1.jpg "title")
+
+通过上图我们得知，`$.getdata` 里面的内容是`_key`, 寻找`_key` 对应的字符串就是 “XDM_Header”。因此，该脚本所需要的环境变量名称为 `XDM_Header`，在 `keys` 中填写环境变量，以及相关信息。
+```js
+ ”keys”:[“XDM_Header”],
+    “descs_html”:[“打开客户端即可获取cookie”],
+    ”setting”:[
+     {
+      “id”:”XDM_Header”,
+      ”name”:”小豆苗环境变量”,
+      //默认值，一半留空
+      ”val”:””,
+      ”type”:”textarea”，
+      “desc”:”小豆苗签到的请求头信息”
+    },
+    ]
+```
+
+天翼云盘脚本的应用订阅过程类似，打开脚本，寻找 `$.getdata`, 找到对应的字符串为 “ty_session”。
+
+![天翼云盘app](../../../../img/boxjs/image_2.jpg "title")
+
+如图所示，该脚本所需要的环境变量名称为 `ty_session`，在 keys 中填写环境变量，以及相关信息.
+
+```js
+ ”keys”:[“ty_session”],
+    “descs_html”:[“天翼云盘获取session”],
+    ”setting”:[
+     {
+      “id”:”ty_session”,
+      ”name”:”天翼云盘环境变量”,
+      //默认值，一半留空
+      ”val”:””,
+      ”type”:”textarea”，
+      “desc”:”天翼云盘签到的session信息”
+    },
+    ]
+```
+##### 环境变量的使用教程
+
+一般来说，我的脚本注释通常都会有将 `XXX` 填写到 `XXX` 的描述，我会在这里演示一遍具体的操作流程，希望大家能够学会。
+
+例如`松鼠 ios` 的签到脚本：找到 `cookie`，填写到 `sxios_data`, 多账号用 `@`分割
+
+首先打开 `boxjs`，点击我的。
+
+![说明](../../../../img/boxjs/image_3.jpg "title")
+
+点击数据查看器，在数据键输入 `sxios_data`, 点击 `VIEW`s 查看具体内容，此时看到的数据为空。
+
+![说明](../../../../img/boxjs/image_4.jpg "title")
+
+在数据内容输入你抓到的 `cookie` 信息，如果有多个账号，就用 `@`拼接，如 `cookie@cookie@cookie`, 最后点击保存。此时再运行脚本就不会出现未找到环境变量等问题了。
+
+以上，教程结束。
+
+##### 后记
+
+教学类型文章不可避免会有一些专业性。俗话说：授人以鱼不如授人以渔，授之以渔可解一生之需。
+
+祝大家学成归来。
+
+
+
+
+
+
+
+
+<!-- *———      __ 后记于 __* -->
