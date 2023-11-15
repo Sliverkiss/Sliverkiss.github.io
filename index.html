@@ -1,6 +1,6 @@
 ---
 layout: page
-description: "「version 1.0」"
+description: "「这里是 Sliverkiss 的个人博客，与你一起发现更大的世界 | 相遇即是缘分～」"
 ---
 
 {% for post in paginator.posts %}
@@ -16,14 +16,15 @@ description: "「version 1.0」"
         {% endif %}
         <div class="post-content-preview">
             {% if post.lang == 'en' %}
-                {{ post.content | strip_html | truncate:300 }}
+            {{ post.content | strip_html | truncate:300 }}
             {% else %}
-                {{ post.content | strip_html | truncate:200 }}
+            {{ post.content | strip_html | truncate:200 }}
             {% endif %}
         </div>
     </a>
     <p class="post-meta">
-        Posted by {% if post.author %}{{ post.author }}{% else %}{{ site.title }}{% endif %} on {{ post.date | date: "%B %-d, %Y" }}
+        Posted by {% if post.author %}{{ post.author }}{% else %}{{ site.title }}{% endif %} on {{ post.date | date: "%B
+        %-d, %Y" }}
     </p>
 </div>
 <hr>
