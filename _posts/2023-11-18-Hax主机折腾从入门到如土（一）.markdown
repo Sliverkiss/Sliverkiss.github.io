@@ -27,7 +27,8 @@ hax本身的vps虽然不太友好，但是可以用来托管tg机器人、Whatsa
 文章仅供学习交流，请勿滥用此服务。
 
 ### ▎申请机器
-> 注册过程中，需要关闭浏览器的广告拦截程序，如Adblock Plus等，否则网站无法打开，提示“Please disable AdBlock to access this site!”
+
+注册过程中，需要关闭浏览器的广告拦截程序，如Adblock Plus等，否则网站无法打开，提示“Please disable AdBlock to access this site!”
 
 1. 关注官方的TG机器人[HaxTG_bot](https://t.me/HaxTG_bot)，然后发送: `/getid`获取帐号ID
 2. 注册页面填写账号ID，提交后TG会得到一个注册代码
@@ -112,7 +113,7 @@ Centos 系统：
   systemctl disable firewalld.service
   ```
 
-### ▎安装Warp脚本
+#### ▎安装Warp脚本
 众所周知，`Warp`是个很好的东西，不仅可以提供相对干净的出站节点，还支持chatGpt，解锁奈飞流媒体等。
 
 对`IPv6 only VPS`来说，安装warp，让其可以调用`IPv4`接口，从而使`vps`上的青龙、V2P等项目能够正常运行。
@@ -125,7 +126,7 @@ wget -N https://gitlab.com/fscarmen/warp/-/raw/main/menu.sh && bash menu.sh
 ```shell
 warp
 ```
-##### ▎安装宝塔面板
+#### ▎安装宝塔面板
 
 1. 按照[官方教程](https://www.bt.cn/bbs/thread-19376-1-1.html)安装宝塔面板。一键安装脚本如下：
 - Centos
@@ -167,7 +168,7 @@ reboot
 ```
 
 至此，服务器的宝塔面板已经可以通过`IPv6:8080`端口正常访问。
-### ▎安装1Panel
+#### ▎安装1Panel
 使用了一段时间宝塔面板后，我发现它其实并不是很好用，主要原因有：
 
 1. 广告，无法忍受那些多余的东西充斥在vps上，这并不优雅。
@@ -223,7 +224,7 @@ reboot
 
 ![1panel](../../../../img/hax/image_7.png "title")
 
-#### ▎致谢
+### ▎致谢
 本博客主要内容参考于以下来源：
 
 [@fscarmen](https://gitlab.com/fscarmen/warp/)
