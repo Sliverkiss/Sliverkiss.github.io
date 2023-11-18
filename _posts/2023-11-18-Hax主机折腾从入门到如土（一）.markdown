@@ -1,0 +1,215 @@
+---
+layout:     post
+title:      "Hax主机折腾从入门到如土（一）"
+subtitle:   " \"记录一次曲折的ipv6机器折腾记录\""
+date:       2023-11-18 16:00:00
+author:     "Sliverkiss"
+header-img: "img/bg/image_6.jpg"
+catalog: true
+tags:
+    - Code
+---
+
+> “If you care about me at all, please don't say anything to anyone. ”
+
+#### ▎简介
+
+这篇文章整理了一些领取hax的免费ipv6 vps以及如何使用的基础教程。
+
+hax本身的vps虽然不太友好，但是可以用来托管tg机器人、Whatsapp机器人、Python脚本、网络服务器、学习Linux服务器等。
+
+考虑到许多活动都有时间限制，可以通过关注论坛、加入tg群等获取最新信息。hax的站长专门为`mjj`开了个分群[[IPv6 Server - Chinese]](https://t.me/ipv6china),可以进群里学习技术（~~吹水~~）.
+
+▎官网入口：[hax.co.id](https://hax.co.id)
+
+#### ▎注意事项
+
+文章仅供学习交流，请勿滥用此服务。
+
+#### ▎申请机器
+> 注册过程中，需要关闭浏览器的广告拦截程序，如Adblock Plus等，否则网站无法打开，提示“Please disable AdBlock to access this site!”
+1. 关注官方的TG机器人[HaxTG_bot](https://t.me/HaxTG_bot)，然后发送: `/getid`获取帐号ID
+2. 注册页面填写账号ID，提交后TG会得到一个注册代码
+3. 按照要求完成注册登录即可
+4. 创建一台免费的VPS,成功后如下图：
+![创建成功](../../../../img/hax/image_1.png "title")
+
+#### ▎连接SSH
+由于hax提供的`VPS`没有`IPv4`，所以只有`IPv6`才能登陆。可以通过[ipv6-test](https://www.test-ipv6.com/)检查你的网络是否支持 `IPv6`。
+
+1. 使用hax官网提供的 `Terminal` 登陆,网页入口：
+2. 通过`Warp`开通`ipv6`隧道，然后使用`ssh`连接。具体的`Warp`使用方法可以参考以下教程：
+     - [CloudFlare WARP官方客户端详细使用教程](https://blog.misaka.rest/2023/02/08/cf-warp/?highlight=warp)
+     - [申请CloudFlare Teams(Zero Trust)账户教程](https://blog.misaka.rest/2023/02/08/cf-teams/?highlight=warp)
+
+#### ▎vps监控与续期
+
+在hax领取的`IPv6 only VPS`仅有7天的有效期，如果想要继续使用，则需要在到期前进行手动续期。
+1. 续期时，点击Extend VPS进入续期页面，输入`hax.co.id`并完成数学题，勾选复选框，点击`Renew VPS`按钮。
+![点击续期](../../../../img/hax/image_2.png "title")
+2. 点击`INPUT RENEW CODE`按钮
+![点击续期](../../../../img/hax/image_3.png "title")
+3. 复制粘贴从Bot发来的续期口令，完成数学题以及人机验证，点击`Renew VPS`按钮。
+![点击续期](../../../../img/hax/image_4.png "title")
+4.看到此消息即可代表续期成功。
+![点击续期](../../../../img/hax/image_5.png "title")
+
+考虑到有些人常常会因为各种各样的事情忘记续费，从而导致痛失vps的问题，我写了一个用于监控hax的vps到期情况的[辅助工具](https://gist.githubusercontent.com/Sliverkiss/c92ff545b2c48da565c029720c5282db/raw/hax.js)（~~小脚本~~）。
+
+该脚本兼容`Surge`、`Quantumult X`、`Loon`、`Shadowrocket`、`Node.js`等。
+
+⚠️此脚本仅用于学习研究，禁止其他商业以及非法用途。
+> ps:可以通过运行该脚本获取快速登录链接，从而减少登录hax时所需要的繁琐操作。
+
+hax监控脚本具体使用方法如下：
+1. 抓`https://oauth.telegram.org/auth/push?bot_id=5938743585&origin=https%3A%2F%2Fhax.co.id&embed=1&request_access=write&return_to=https%3A%2F%2Fhax.co.id%2Flogin`接口的`Cookie`。
+2. 抓`https://hax.co.id/vps-info/`接口的`PHPSESSID=XXXXXXXX;`。
+3. 将上面抓取到的两个数据分别用`#`拼接，如`stel_token=XXXX;stel_ssid=XXXXX#PHPSESSID=XXXXX;`,填写到`hax_data`,多账号用 `@`分割
+
+监控成功通知如下图所示：
+![监控通知](../../../../img/hax/image_6.png "title")
+
+#### ▎vps的初步搭建与应用
+如果在Hax领取到了`OpenVZ`的机器，在安装`Warp`脚本之前需要先进入`Poweroff & Restart VPS`页面,点击`Enable Tun`按钮启用`TUN`模块,随后再点击`Restart`按钮重新启动vps以让`TUN`模块生效。
+
+##### ▎服务器关闭防火墙，开放所有端口
+###### ▎Ubuntu系统：
+开放所有端口：
+```shell
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -F
+```
+取消默认的Iptable规则:
+```shell
+apt-get purge netfilter-persistent
+reboot
+```
+或者强制删除:
+```shell
+rm -rf /etc/iptables && reboot
+```
+###### ▎Centos 系统：
+删除多余附件:
+```shell
+systemctl stop oracle-cloud-agent
+systemctl disable oracle-cloud-agent
+systemctl stop oracle-cloud-agent-updater
+systemctl disable oracle-cloud-agent-updater
+```
+停止 firewall:
+```shell
+systemctl stop firewalld.service
+```
+禁止 firewall 开机启动:
+```shell
+systemctl disable firewalld.service
+```
+##### ▎安装Warp脚本
+众所周知，`Warp`是个很好的东西，不仅可以提供相对干净的出站节点，还支持chatGpt，解锁奈飞流媒体等。
+
+对`IPv6 only VPS`来说，安装warp，让其可以调用`IPv4`接口，从而使`vps`上的青龙、V2P等项目能够正常运行。
+
+warp一键安装脚本如下：
+```shell
+wget -N https://gitlab.com/fscarmen/warp/-/raw/main/menu.sh && bash menu.sh
+```
+日常维护
+```shell
+warp
+```
+##### ▎安装宝塔面板
+1. 按照[官方教程](https://www.bt.cn/bbs/thread-19376-1-1.html)安装宝塔面板。一键安装脚本如下：
+
+- Centos
+  ```shell
+  yum install -y wget && wget -O install.sh https://download.bt.cn/install/install_6.0.sh && sh install.sh ed8484bec
+  ```
+- Ubuntu/Deepin
+  ```shell
+  wget -O install.sh https://download.bt.cn/install/install-ubuntu_6.0.sh && sudo bash install.sh ed8484bec
+  ```
+- Debian
+  ```shell
+  wget -O install.sh https://download.bt.cn/install/install-ubuntu_6.0.sh && bash install.sh ed8484bec
+  ```
+2. 执行指令使面板监听 `IPv6`
+```shell
+echo '::' > /www/server/panel/data/ipv6.pl && /etc/init.d/bt restart
+```
+3. 执行指令将面板端口修改至`8080`,不要改成其他端口。因为 `Cloudflare` 开放`HTTP`访问的端口有`80`、`8080`、`8880`、`2052`、`2082`、`2086`、`2095`,除此之外的端口无法访问，所以必须改成其中一个。
+```shell
+echo "8080" > /www/server/panel/data/port.pl
+```  
+4. 让系统防火墙放行 `8080` 端口。
+
+- CentOS
+  ```shell
+  firewall-cmd --permanent --zone=public --add-port=8080/tcp
+  ```
+- Debian/Ubuntu
+  ```shell
+  ufw allow 8080
+  ```
+5. 重启服务器使上面所有变更生效
+```shell
+reboot
+```
+至此，服务器的宝塔面板已经可以通过`IPv6:8080`端口正常访问。
+#### ▎后记
+##### ▎安装1Panel
+使用了一段时间宝塔面板后，我发现它其实并不是很好用，主要原因有：
+1. 广告，无法忍受那些多余的东西充斥在vps上，这并不优雅。
+2. 会员功能限制，宝塔面板有些功能只有会员才能使用，这不符合我的实用主义。
+
+因此，我决定卸载宝塔面板，并使用开源的`1Panel`面板。
+
+宝塔面板卸载命令如下：
+```shell
+wget http://download.bt.cn/install/bt-uninstall.sh
+sh bt-uninstall.sh
+```
+1Panel一键安装命令如下：
+
+- RedHat/CentOS
+  ```shell
+  curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_start.sh && sh quick_start.sh
+  ```
+- Ubuntu
+  ```shell
+  curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_start.sh && sudo bash quick_start.sh
+  ```
+- Debian
+  ```shell
+  curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_start.sh && bash quick_start.sh
+  ```
+
+安装完成后，需要执行指令使`1panel`面板监听 `IPv6`
+```shell
+1panel listen-ip ipv6
+```
+让系统防火墙放行端口
+- CentOS
+  ```shell
+  firewall-cmd --permanent --zone=public --add-port=端口/tcp
+  ```
+- Debian/Ubuntu
+  ```shell
+  ufw allow 端口
+  ```
+重启服务器使上面所有变更生效
+```shell
+reboot
+```
+至此，服务器的1panel面板已经可以通过`http://[IPv6]:端口`正常访问。效果如下图所示：
+![1panel](../../../../img/hax/image_7.png "title")
+
+#### ▎致谢
+本博客主要内容参考于以下来源：
+[@fscarmen](https://gitlab.com/fscarmen/warp/)
+[@Misaka](https://blog.misaka.rest)
+[@Bzlrs](https://blog.iuiun.com)
+[@颜家小小](https://www.idcfq.com/315.html)
+
+<!-- *———      __ 后记于 __* -->
