@@ -1,8 +1,8 @@
 ---
 layout:     post
-title:      github博客绑定域名"
+title:      github博客绑定域名
 subtitle:   " \"记录一次将github的静态博客绑定到自己的域名的过程\""
-date:       2023-11-18 16:00:00
+date:       2023-11-25 16:00:00
 author:     "Sliverkiss"
 header-img: "img/bg/image_3.jpg"
 catalog: true
