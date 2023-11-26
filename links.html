@@ -24,12 +24,7 @@ header-mask: 0.3
 
       <ul>
         {% for friend in site.friends %}
-        <a
-          class="friend_tag"
-          target="_blank"
-          href="{{friend.href}}"
-          title="{{friend.title}}"
-          style="
+        <a class="friend_tag" target="_blank" href="{{friend.href}}" title="{{friend.title}}" style="
             text-align: center;
             box-sizing: border-box;
             background-color: transparent;
@@ -46,45 +41,29 @@ header-mask: 0.3
             margin-top: 30px;
             cursor: pointer;
             margin-right: 5px;
-          "
-          >{{friend.title}}</a
-        >
+          ">{{friend.title}}</a>
         {% endfor %}
       </ul>
       <hr />
       <p>欢迎在下方留言申请加入我的友链，请按如下格式提供信息：</p>
       <ul>
         <li>
-          <p><strong>博客名</strong>: tLLWtG Blog</p>
+          <p><strong>博客名</strong>: Sliverkiss blog</p>
         </li>
         <li>
-          <p><strong>链接</strong>: tllwtg.top</p>
+          <p><strong>链接</strong>: sliverkiss.free.hr</p>
         </li>
         <li>
-          <p><strong>邮箱</strong>: tllwtg@gmail.com</p>
+          <p><strong>邮箱</strong>: tistzach@gmail.com</p>
         </li>
       </ul>
       <!---->
 
       {% if site.giscus %}
-      <script
-        src="https://giscus.app/client.js"
-        data-repo="tLLWtG/tllwtg.github.io"
-        data-repo-id="R_kgDOH3yTZg"
-        data-category="Announcements"
-        data-category-id="DIC_kwDOH3yTZs4CT2g1"
-        data-mapping="title"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="light"
-        data-lang="zh-CN"
-        data-loading="lazy"
-        data-strict="1"
-        crossorigin="anonymous"
-        async
-      ></script>
+      <script src="https://giscus.app/client.js" data-repo="tLLWtG/tllwtg.github.io" data-repo-id="R_kgDOH3yTZg"
+        data-category="Announcements" data-category-id="DIC_kwDOH3yTZs4CT2g1" data-mapping="title" data-strict="0"
+        data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="zh-CN"
+        data-loading="lazy" data-strict="1" crossorigin="anonymous" async></script>
       {% endif %}
       <!---->
     </div>
