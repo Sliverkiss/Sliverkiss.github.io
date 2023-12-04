@@ -32,13 +32,15 @@ tags:
 tunnel --no-autoupdate run --token 你的token
 ```
 
+![IMG_3952.png](https://pic.ziyuan.wang/2023/12/04/guest_acfb40ea13f3a.png)
+
 ### UNRAID端配置cloudflared
 
-1. 登录进入UNRAID，在应用市场搜索`cloudflared`，选择`aeleo`的库，点击安装。
+登录进入UNRAID，在应用市场搜索`cloudflared`，选择`aeleo`的库，点击安装。
 
 ![IMG_3953.png](https://pic.ziyuan.wang/2023/12/04/guest_46a3393691196.png)
 
-2. 修改容器配置，开启高级视图，将存储库修改为`cloudflare/cloudflared:latest`，获取最新版本，并添加发布参数
+修改容器配置，开启高级视图，将存储库修改为`cloudflare/cloudflared:latest`，获取最新版本，并添加发布参数
 
 ```shell
 tunnel --no-autoupdate run --token 你的token
@@ -46,12 +48,12 @@ tunnel --no-autoupdate run --token 你的token
 
 ![IMG_3954.png](https://pic.ziyuan.wang/2023/12/04/guest_e96ab60ff4ea1.png)
 
-3. 完成配置后，返回Cloudflare Zero Trust页面，等待1～2分钟，此时的隧道状态变为`HEALTHY`，说明隧道配置已完成。
+完成配置后，返回Cloudflare Zero Trust页面，等待1～2分钟，此时的隧道状态变为`HEALTHY`，说明隧道配置已完成。
 
 ![IMG_3955.png](https://pic.ziyuan.wang/2023/12/04/guest_ee952a0cb77b0.png)
 
 ### 完成隧道配置，设置反向代理
-1. 进入隧道配置页面，创建新的`public hostname`，设置反向代理。
+进入隧道配置页面，创建新的`public hostname`，设置反向代理。
 
 ![IMG_3956.png](https://pic.ziyuan.wang/2023/12/04/guest_e4745511429e8.png)
 
