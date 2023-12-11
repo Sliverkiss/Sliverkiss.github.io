@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      Alisa简易美化（一）
+title:      Alist简易美化（一）
 subtitle:   " \"记录一次简单美化Alist网盘的过程\""
 date:       2023-12-05 12:30:00
 author:     "Sliverkiss"
