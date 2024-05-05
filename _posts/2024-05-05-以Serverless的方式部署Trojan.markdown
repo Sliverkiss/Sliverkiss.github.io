@@ -18,7 +18,7 @@ tags:
 ## 部署
 1.登录Cloudflare，在左边的侧边栏选择Workers和Pages，点击进入worker概述页面。
 
-![IMG_4432.jpeg](https://pic2.ziyuan.wang/user/tistzach/2024/05/IMG_4432_1b58dd799f746.jpeg)
+![IMG_4432.jpeg](https://pic2.ziyuan.wang/user/tistzach/2024/05/IMG_4432_aa4b1e6f8d9c7.jpeg)
 
 2.点击创建应用程序按钮，选择创建新的page项目
 
@@ -47,5 +47,11 @@ tags:
 8.访问https://刚刚绑定的域名/sub,获取节点订阅
 
 ![IMG_4439.jpeg](https://pic2.ziyuan.wang/user/tistzach/2024/05/IMG_4439_139813bd53d4e.jpeg)
+
+
+
+
+
+
 
 <!-- *———      __ 后记于 __* -->
