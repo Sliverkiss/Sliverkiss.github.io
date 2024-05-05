@@ -16,15 +16,15 @@ tags:
 
 
 ## 部署
-1. 登录Cloudflare，在左边的侧边栏选择Workers和Pages，点击进入worker概述页面。
+1.登录Cloudflare，在左边的侧边栏选择Workers和Pages，点击进入worker概述页面。
 
 ![IMG_4432.jpeg](https://pic2.ziyuan.wang/user/tistzach/2024/05/IMG_4432_1b58dd799f746.jpeg)
 
-2. 点击创建应用程序按钮，选择创建新的page项目
+2.点击创建应用程序按钮，选择创建新的page项目
 
 ![IMG_4433.jpeg](https://pic2.ziyuan.wang/user/tistzach/2024/05/IMG_4433_1411ec3f63a02.jpeg)
  
-3. 输入项目名称，上传[_worker.js](https://gist.githubusercontent.com/Sliverkiss/e756e7712b7b6da843f9e28a1a2933fc/raw/_worker.js)文件,完成创建page项目。
+3.输入项目名称，上传[_worker.js](https://gist.githubusercontent.com/Sliverkiss/e756e7712b7b6da843f9e28a1a2933fc/raw/_worker.js)文件,完成创建page项目。
 
 ![IMG_4434.jpeg](https://pic2.ziyuan.wang/user/tistzach/2024/05/IMG_4434_c8b43296df7a5.jpeg)
 
@@ -40,13 +40,12 @@ tags:
 
 ![IMG_4437.jpeg](https://pic2.ziyuan.wang/user/tistzach/2024/05/IMG_4437_23510f2882af1.jpeg)
 
-7. 验证完成效果图如下
+7.验证完成效果图如下
 
 ![IMG_4438.jpeg](https://pic2.ziyuan.wang/user/tistzach/2024/05/IMG_4438_f8b174b47914c.jpeg)
 
 8.访问https://刚刚绑定的域名/sub,获取节点订阅
 
 ![IMG_4439.jpeg](https://pic2.ziyuan.wang/user/tistzach/2024/05/IMG_4439_139813bd53d4e.jpeg)
-
 
 <!-- *———      __ 后记于 __* -->
