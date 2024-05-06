@@ -77,7 +77,7 @@ tags:
 
 ![IMG_4446.jpeg](https://pic2.ziyuan.wang/user/tistzach/2024/05/IMG_4446_2dbe4b8b0adb2.jpeg)
 
-5.在host输入之前自定义域的前缀。如```xxx.aaa.cloudns.ch```,前缀则为```xxx```，```Point to```输入之前第三步复制的```目标```内容，最后点击```Save```。
+5.将```Type```选择为```CName```，并在host输入之前自定义域的前缀。如```xxx.aaa.cloudns.ch```,前缀则为```xxx```，```Point to```输入之前第三步复制的```目标```内容，最后点击```Save```。
 
 6.返回Page管理页面，再次点击检查DNS记录，等待完成验证。
 
@@ -100,7 +100,7 @@ tags:
 
 ![IMG_4448.jpeg](https://pic2.ziyuan.wang/user/tistzach/2024/05/IMG_4448_de032879395df.jpeg)
 
-4.将脚本操作中的```_______.com```全部更改为自己刚刚绑定的自定义域名。如```xxx.aaa.cloudns.ch```。
+4.将脚本操作中的```_______.com```全部更改为自己刚刚绑定的自定义域名。如```xxx.aaa.cloudns.ch```。将```proxyip.sg.fxxk.dedyn.io```中的```sg```字段修改为所选区域，如```hk```、```JP```等。
 
 ![IMG_4449.jpeg](https://pic2.ziyuan.wang/user/tistzach/2024/05/IMG_4449_eea96d365d058.jpeg)
 
