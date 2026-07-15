@@ -1,29 +1,25 @@
 {
-	"compilerOptions": {
-		"target": "ESNext",
-		"module": "ESNext",
-		"moduleResolution": "bundler",
-		"jsx": "preserve",
-		"jsxImportSource": "astro",
-		"strictNullChecks": true,
-		"allowJs": false,
-		"declaration": true,
-		"skipLibCheck": true,
-		"plugins": [
-			{
-				"name": "@astrojs/ts-plugin"
-			}
-		],
-		"paths": {
-			"@components/*": ["./src/components/*"],
-			"@assets/*": ["./src/assets/*"],
-			"@constants/*": ["./src/constants/*"],
-			"@utils/*": ["./src/utils/*"],
-			"@i18n/*": ["./src/i18n/*"],
-			"@layouts/*": ["./src/layouts/*"],
-			"@/*": ["./src/*"],
-			"src/*": ["./src/*"]
-		}
-	},
-	"include": ["src/**/*"]
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist", "cms"],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"],
+      "@assets/*": ["assets/*"],
+      "@components/*": ["components/*"],
+      "@content/*": ["content/*"],
+      "@layouts/*": ["layouts/*"],
+      "@pages/*": ["pages/*"],
+      "@styles/*": ["styles/*"],
+      "@lib/*": ["lib/*"],
+      "@constants/*": ["constants/*"],
+      "@hooks/*": ["hooks/*"],
+      "@store/*": ["store/*"],
+      "@scripts/*": ["scripts/*"],
+      "@types/*": ["types/*"]
+    }
+  }
 }

@@ -1,13 +1,12 @@
 # build output
 dist/
+.sonda/
 
 # generated types
 .astro/
-demo
-plans
 
 # dependencies
-node_modules/
+node_modules
 
 # logs
 npm-debug.log*
@@ -18,44 +17,23 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+.env*.local
 
-# content repository (independent mode)
-/content/
-*.backup
-
-# Large zip files
-*.zip
+# vercel
+.vercel
+.superset
 
 # macOS-specific files
 .DS_Store
 
-.vercel
+# jetbrains setting folder
+.idea/
+.vscode/
 
-package-lock.json
-bun.lockb
-yarn.lock
+# Transformers.js model cache
+.cache/*
+# Keep OG data cache for Vercel builds
+!.cache/og-data.json
 
-# ide
-.idea
-*.iml
-.claude
-
-cache/
-fuwari/
-src/data/myself.ts
-src/pages/myself.astro
-
-# Bangumi generated data
-src/data/bangumi-data.json
-
-# Bilibili generated data
-src/data/bilibili-data.json
-
-# Lighthouse CI
-.lighthouseci/
-
-# Live2D editor source files
-*.psd
-*.psd~
-*.cmo3
-*.vtube.json
+# Backup files
+backups/

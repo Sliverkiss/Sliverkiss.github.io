@@ -1,100 +1,62 @@
-// import { getCollection } from "astro:content";
-
-import { getImage } from "astro:assets";
-import type { RSSFeedItem } from "@astrojs/rss";
-import rss from "@astrojs/rss";
-import type { APIContext, ImageMetadata } from "astro";
-import MarkdownIt from "markdown-it";
-import { parse as htmlParser } from "node-html-parser";
-import sanitizeHtml from "sanitize-html";
-
-import { siteConfig } from "@/config";
-import { getSortedPosts } from "@/utils/content-utils";
-import { resolvePostContentImageImportPath } from "@/utils/feed-image-utils";
-import { initPostIdMap } from "@/utils/permalink-utils";
-import { getPostPublicDescription } from "@/utils/post-card-content";
-import { getPostUrl } from "@/utils/url-utils";
-
-const markdownParser = new MarkdownIt();
-
-// get dynamic import of images as a map collection
-const imagesGlob = import.meta.glob<{ default: ImageMetadata }>(
-	"/src/content/**/*.{jpeg,jpg,png,gif,webp}", // include posts and assets
-);
+// edit https://github.com/lawvs/lawvs.github.io/blob/dba2e51e312765f8322ee87755b4e9c22b520048/src/pages/rss.xml.ts
+import rss from '@astrojs/rss';
+import { siteConfig } from '@constants/site-config';
+import { getCategoryArr, getPostSlug, getSortedPosts } from '@lib/content';
+import { encodeSlug } from '@lib/route';
+import { buildRssItemFields } from '@lib/rss-utils';
+import type { APIContext } from 'astro';
+import type { BlogPost } from 'types/blog';
+import { defaultLocale } from '@/i18n';
 
 export async function GET(context: APIContext) {
-	if (!context.site) {
-		throw Error("site not set");
-	}
+  const posts = await getSortedPosts(defaultLocale);
+  const { site } = context;
 
-	// Use the same ordering as site listing (pinned first, then by published desc)
-	const posts = (await getSortedPosts()).filter((post) => !post.data.encrypted);
+  if (!site) {
+    throw new Error('Missing site metadata');
+  }
 
-	// 初始化文章 ID 映射（用于 permalink 功能）
-	initPostIdMap(posts);
+  const response = await rss({
+    title: siteConfig.title,
+    description: siteConfig.subtitle || 'No description',
+    site,
+    trailingSlash: false,
+    stylesheet: '/rss/feed.xsl', // https://docs.astro.build/en/recipes/rss/#adding-a-stylesheet
+    items: posts.slice(0, 20).map((post: BlogPost) => {
+      // 获取分类数组
+      const categoryArr = getCategoryArr(post.data.categories?.[0]);
 
-	const feed: RSSFeedItem[] = [];
+      // 构建 categories 数组，包含分类和标签
+      const categories = [
+        // 添加分类信息 (使用 domain 属性区分)
+        ...(categoryArr || []).map((cat) => `category:${cat}`),
+        // 添加标签信息
+        ...(post.data.tags || []).map((tag) => `tag:${tag}`),
+      ];
 
-	for (const post of posts) {
-		// convert markdown to html string, ensure post.body is a string
-		const body = markdownParser.render(String(post.body ?? ""));
-		// convert html string to DOM-like structure
-		const html = htmlParser.parse(body);
-		// hold all img tags in variable images
-		const images = html.querySelectorAll("img");
+      const postSlug = getPostSlug(post);
+      const postLink = `/post/${encodeSlug(postSlug)}`;
+      const { title, description, content } = buildRssItemFields(post, defaultLocale);
 
-		for (const img of images) {
-			const src = img.getAttribute("src");
-			if (!src) {
-				continue;
-			}
+      return {
+        title,
+        pubDate: post.data.date,
+        description,
+        link: postLink,
+        content,
+        categories,
+        // Add domain-independent GUID using customData
+        // The slug-only GUID ensures stability across domain changes
+        customData: `<guid isPermaLink="false">${postSlug}</guid>`,
+      };
+    }),
+  });
 
-			// Handle content-relative images and convert them to built _astro paths
-			if (
-				src.startsWith("./") ||
-				src.startsWith("../") ||
-				(!src.startsWith("http") && !src.startsWith("/"))
-			) {
-				const importPath = resolvePostContentImageImportPath(post, src);
-				if (!importPath) {
-					continue;
-				}
-
-				const imageMod = await imagesGlob[importPath]?.()?.then(
-					(res) => res.default,
-				);
-				if (imageMod) {
-					const optimizedImg = await getImage({ src: imageMod });
-					img.setAttribute("src", new URL(optimizedImg.src, context.site).href);
-				} else {
-					// Debug: log the failed import path
-					console.log(
-						`Failed to load image: ${importPath} for post: ${post.id}`,
-					);
-				}
-			} else if (src.startsWith("/")) {
-				// images starting with `/` are in public dir
-				img.setAttribute("src", new URL(src, context.site).href);
-			}
-		}
-
-		feed.push({
-			title: post.data.title,
-			description: getPostPublicDescription(post.data),
-			pubDate: post.data.published,
-			link: getPostUrl(post),
-			// sanitize the new html string with corrected image paths
-			content: sanitizeHtml(html.toString(), {
-				allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img"]),
-			}),
-		});
-	}
-
-	return rss({
-		title: siteConfig.title,
-		description: siteConfig.subtitle || "No description",
-		site: context.site,
-		items: feed,
-		customData: `<language>${siteConfig.lang}</language>`,
-	});
+  // 显式设置 Content-Type 包含 charset，解决中文乱码问题
+  const headers = new Headers(response.headers);
+  headers.set('Content-Type', 'application/xml; charset=utf-8');
+  return new Response(response.body, {
+    status: response.status,
+    headers,
+  });
 }

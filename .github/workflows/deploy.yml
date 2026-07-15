@@ -50,7 +50,6 @@ jobs:
           git clone --depth 1 --branch pages "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$DEPLOY_DIR" \
             || (git clone --depth 1 "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$DEPLOY_DIR" && cd "$DEPLOY_DIR" && git checkout --orphan pages)
           cd "$DEPLOY_DIR"
-          # keep only git metadata
           find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
           cp -a "$GITHUB_WORKSPACE/dist/." .
           git add -A

@@ -1,57 +1,46 @@
 ---
-/**
- * ButtonLink - 分类列表按钮组件
- *
- * 用于分类、归档等列表项的链接按钮，支持徽章显示。
- *
- * @deprecated 这是一个特定用途的组件，保留在 control/ 目录中。
- *             新的通用按钮需求请使用 atoms/Button。
- */
-interface Props {
-	badge?: string;
-	url?: string;
-	label?: string;
-}
-const { badge, url, label } = Astro.props;
+import { cn } from '@lib/utils';
+import { cva, type VariantProps } from 'class-variance-authority';
+
+const buttonVariants = cva(
+  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+        outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        link: 'text-primary underline-offset-4 hover:underline',
+        'gradient-shoka': 'bg-gradient-shoka-button text-primary-foreground',
+        unstyle: '',
+      },
+      size: {
+        default: 'h-10 px-4 py-2',
+        sm: 'h-9 rounded-md px-3',
+        lg: 'h-11 rounded-md px-8',
+        icon: 'h-10 w-10',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  },
+);
+
+type Props = {
+  url?: string;
+  label?: string;
+  className?: string;
+} & VariantProps<typeof buttonVariants>;
+
+const { url, label, variant, size, className, ...rest } = Astro.props;
+const Element = url ? 'a' : 'button';
+const attrs = url ? { href: url, 'aria-label': label } : {};
 ---
 
-<a href={url} aria-label={label}>
-	<button
-		class:list={`
-            w-full
-            h-10
-            rounded-lg
-            bg-none
-            hover:bg-(--btn-plain-bg-hover)
-            active:bg-(--btn-plain-bg-active)
-            transition-all
-            pl-2
-            hover:pl-3
-            
-            text-neutral-700
-            hover:text-(--primary)
-            dark:text-neutral-300
-            dark:hover:text-(--primary)
-        `}
-	>
-		<div class="flex items-center justify-between relative mr-2">
-			<div
-				class="overflow-hidden text-left whitespace-nowrap text-ellipsis"
-			>
-				<slot />
-			</div>
-			{
-				badge !== undefined && badge !== null && badge !== "" && (
-					<div
-						class="transition px-2 h-7 ml-4 min-w-8 rounded-lg text-sm font-bold
-                    text-(--btn-content) dark:text-(--deep-text)
-                    bg-[oklch(0.95_0.025_var(--hue))] dark:bg-(--primary)
-                    flex items-center justify-center"
-					>
-						{badge}
-					</div>
-				)
-			}
-		</div>
-	</button>
-</a>
+<Element {...attrs} class:list={cn(buttonVariants({ variant, size }), className)} {...rest}>
+  <slot />
+</Element>

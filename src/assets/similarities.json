@@ -1,0 +1,164 @@
+{
+  "getting-started": [
+    {
+      "slug": "astro-koharu-guide",
+      "title": "astro-koharu 使用指南",
+      "similarity": 0.752
+    },
+    {
+      "slug": "theme-customization",
+      "title": "主题定制指南",
+      "similarity": 0.675
+    },
+    {
+      "slug": "markdown-features",
+      "title": "Markdown 增强功能演示",
+      "similarity": 0.649
+    },
+    {
+      "slug": "toc-no-numbering",
+      "title": "关闭目录编号示例",
+      "similarity": 0.513
+    },
+    {
+      "slug": "hello-world",
+      "title": "Hello World",
+      "similarity": 0.425
+    }
+  ],
+  "astro-koharu-guide": [
+    {
+      "slug": "getting-started",
+      "title": "欢迎使用 astro-koharu",
+      "similarity": 0.752
+    },
+    {
+      "slug": "markdown-features",
+      "title": "Markdown 增强功能演示",
+      "similarity": 0.735
+    },
+    {
+      "slug": "theme-customization",
+      "title": "主题定制指南",
+      "similarity": 0.7
+    },
+    {
+      "slug": "toc-no-numbering",
+      "title": "关闭目录编号示例",
+      "similarity": 0.561
+    },
+    {
+      "slug": "hello-world",
+      "title": "Hello World",
+      "similarity": 0.527
+    }
+  ],
+  "toc-no-numbering": [
+    {
+      "slug": "theme-customization",
+      "title": "主题定制指南",
+      "similarity": 0.564
+    },
+    {
+      "slug": "astro-koharu-guide",
+      "title": "astro-koharu 使用指南",
+      "similarity": 0.561
+    },
+    {
+      "slug": "markdown-features",
+      "title": "Markdown 增强功能演示",
+      "similarity": 0.541
+    },
+    {
+      "slug": "getting-started",
+      "title": "欢迎使用 astro-koharu",
+      "similarity": 0.513
+    },
+    {
+      "slug": "hello-world",
+      "title": "Hello World",
+      "similarity": 0.364
+    }
+  ],
+  "markdown-features": [
+    {
+      "slug": "astro-koharu-guide",
+      "title": "astro-koharu 使用指南",
+      "similarity": 0.735
+    },
+    {
+      "slug": "getting-started",
+      "title": "欢迎使用 astro-koharu",
+      "similarity": 0.649
+    },
+    {
+      "slug": "theme-customization",
+      "title": "主题定制指南",
+      "similarity": 0.611
+    },
+    {
+      "slug": "toc-no-numbering",
+      "title": "关闭目录编号示例",
+      "similarity": 0.541
+    },
+    {
+      "slug": "hello-world",
+      "title": "Hello World",
+      "similarity": 0.406
+    }
+  ],
+  "hello-world": [
+    {
+      "slug": "astro-koharu-guide",
+      "title": "astro-koharu 使用指南",
+      "similarity": 0.527
+    },
+    {
+      "slug": "theme-customization",
+      "title": "主题定制指南",
+      "similarity": 0.462
+    },
+    {
+      "slug": "getting-started",
+      "title": "欢迎使用 astro-koharu",
+      "similarity": 0.425
+    },
+    {
+      "slug": "markdown-features",
+      "title": "Markdown 增强功能演示",
+      "similarity": 0.406
+    },
+    {
+      "slug": "toc-no-numbering",
+      "title": "关闭目录编号示例",
+      "similarity": 0.364
+    }
+  ],
+  "theme-customization": [
+    {
+      "slug": "astro-koharu-guide",
+      "title": "astro-koharu 使用指南",
+      "similarity": 0.7
+    },
+    {
+      "slug": "getting-started",
+      "title": "欢迎使用 astro-koharu",
+      "similarity": 0.675
+    },
+    {
+      "slug": "markdown-features",
+      "title": "Markdown 增强功能演示",
+      "similarity": 0.611
+    },
+    {
+      "slug": "toc-no-numbering",
+      "title": "关闭目录编号示例",
+      "similarity": 0.564
+    },
+    {
+      "slug": "hello-world",
+      "title": "Hello World",
+      "similarity": 0.462
+    }
+  ]
+}
