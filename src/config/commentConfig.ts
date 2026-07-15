@@ -5,7 +5,7 @@ import { SITE_LANG } from "./siteConfig";
 // repo node_id: R_kgDOIHsKkQ
 // General category id: DIC_kwDOIHsKkc4DBOXb
 export const commentConfig: CommentConfig = {
-	enable: true,
+	enable: false,
 	system: "giscus",
 	twikoo: {
 		envId: "",
