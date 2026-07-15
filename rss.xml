@@ -1,4 +1,171 @@
-<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet href="/rss/feed.xsl" type="text/xsl"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Sliverkiss Blog</title><description>与你一起发现更大的世界</description><link>https://blog.xn--ug8h.eu.org</link><item><title>使用wrangler创建hono的Worker</title><link>https://blog.xn--ug8h.eu.org/post/note/%E4%BD%BF%E7%94%A8wrangler%E5%88%9B%E5%BB%BAhono%E7%9A%84worker</link><guid isPermaLink="false">note/使用wrangler创建hono的worker</guid><description>Cloudflare Workers 是 Cloudflare 提供的一项服务，它允许您在 Cloudflare 的全球网络边缘运行 JavaScript</description><pubDate>Wed, 11 Dec 2024 04:00:00 GMT</pubDate><content:encoded>&lt;h3&gt;如何使用Cloudflare Workers&lt;a href=&quot;#如何使用cloudflare-workers&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet href="/rss/feed.xsl" type="text/xsl"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Sliverkiss Blog</title><description>与你一起发现更大的世界</description><link>https://blog.xn--ug8h.eu.org</link><item><title>给 Hermes 装 RTK：终端输出瘦身，token 少烧一点</title><link>https://blog.xn--ug8h.eu.org/post/note/%E7%BB%99hermes%E8%A3%85rtk</link><guid isPermaLink="false">note/给hermes装rtk</guid><description>预编译要 GLIBC 2.39、本机只有 2.36 时源码编译；rtk init 对接插件；gateway 必须在会话外重启。</description><pubDate>Wed, 15 Jul 2026 15:59:00 GMT</pubDate><content:encoded>&lt;blockquote&gt;
+&lt;p&gt;能用 &amp;gt; 看起来能用。Agent 天天 &lt;code&gt;git status&lt;/code&gt;、&lt;code&gt;docker ps&lt;/code&gt;，上下文却被原始输出塞满——这种账，值得算一算。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;起因&lt;a href=&quot;#起因&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Hermes 跑久了会发现一件事：工具调用里 &lt;strong&gt;&lt;code&gt;terminal&lt;/code&gt; 占比极高&lt;/strong&gt;，而命令回吐会整段进上下文。&lt;/p&gt;
+&lt;p&gt;七天量级里 input token 可以上亿；其中一大块不是 system prompt，而是 &lt;strong&gt;shell 噪音&lt;/strong&gt;——git 状态、docker 列表、测试日志……模型其实只要结论，却被迫读全文。&lt;/p&gt;
+&lt;p&gt;搜到 &lt;a href=&quot;https://github.com/rtk-ai/rtk&quot;&gt;rtk-ai/rtk&lt;/a&gt;（Rust Token Killer）：单二进制，把常见开发命令输出滤一滤、截一截，官方号称能省 &lt;strong&gt;60%～90%&lt;/strong&gt; 命令侧 token。更关键的是——&lt;strong&gt;官方支持 Hermes&lt;/strong&gt;：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;rtk&lt;/span&gt;&lt;span&gt; init&lt;/span&gt;&lt;span&gt; --agent&lt;/span&gt;&lt;span&gt; hermes&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;会装一个 &lt;code&gt;pre_tool_call&lt;/code&gt; 插件：在 &lt;code&gt;terminal&lt;/code&gt; 真正执行前，把 &lt;code&gt;git status&lt;/code&gt; 改写成 &lt;code&gt;rtk git status&lt;/code&gt;。Agent 不用改习惯，fail-open（rtk 挂了就原样跑）。&lt;/p&gt;
+&lt;p&gt;这比「再叠一套记忆 / 自进化 skill」实在得多。于是就装了。&lt;/p&gt;
+&lt;h2&gt;环境&lt;a href=&quot;#环境&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;项&lt;/th&gt;&lt;th&gt;值&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;机器&lt;/td&gt;&lt;td&gt;Linux &lt;strong&gt;aarch64&lt;/strong&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;glibc&lt;/td&gt;&lt;td&gt;&lt;strong&gt;2.36&lt;/strong&gt;（Debian bookworm 一代）&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Hermes&lt;/td&gt;&lt;td&gt;v0.18.x，gateway 用 systemd user 常驻&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;目标&lt;/td&gt;&lt;td&gt;rtk &lt;strong&gt;0.43.0&lt;/strong&gt; + 官方 Hermes 插件&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;h2&gt;踩坑 1：官方 aarch64 预编译跑不起来&lt;a href=&quot;#踩坑-1官方-aarch64-预编译跑不起来&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;按 README 下 release 里的：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;rtk-aarch64-unknown-linux-gnu.tar.gz&lt;/code&gt;（v0.43.0）&lt;/p&gt;
+&lt;p&gt;一跑：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;/lib/aarch64-linux-gnu/libc.so.6: version `GLIBC_2.39&apos; not found&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;objdump&lt;/code&gt; 看了一圈：预编译链到了 &lt;strong&gt;GLIBC_2.39&lt;/strong&gt; 的 &lt;code&gt;pidfd_*&lt;/code&gt; 一类符号。&lt;br /&gt;
+本机是 &lt;strong&gt;2.36&lt;/strong&gt;。往回翻多个旧 tag（0.25～0.42）的 aarch64 gnu 包，&lt;strong&gt;全是 2.39&lt;/strong&gt;——不是「换个旧版本」能解决的。&lt;/p&gt;
+&lt;p&gt;x86_64 倒有 musl 静态包；&lt;strong&gt;aarch64 目前没有 musl 预编译&lt;/strong&gt;。install.sh 对 aarch64 也是指到同一套 gnu 包。&lt;/p&gt;
+&lt;p&gt;结论：&lt;strong&gt;在 bookworm / 2.36 上，aarch64 只能源码编译。&lt;/strong&gt;&lt;/p&gt;
+&lt;h2&gt;装二进制：本机 cargo release&lt;a href=&quot;#装二进制本机-cargo-release&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;# 装 rustup（若没有）&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;curl&lt;/span&gt;&lt;span&gt; --proto&lt;/span&gt;&lt;span&gt; &apos;=https&apos;&lt;/span&gt;&lt;span&gt; --tlsv1.2&lt;/span&gt;&lt;span&gt; -sSf&lt;/span&gt;&lt;span&gt; https://sh.rustup.rs&lt;/span&gt;&lt;span&gt; |&lt;/span&gt;&lt;span&gt; sh&lt;/span&gt;&lt;span&gt; -s&lt;/span&gt;&lt;span&gt; --&lt;/span&gt;&lt;span&gt; -y&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;.&lt;/span&gt;&lt;span&gt; &quot;&lt;/span&gt;&lt;span&gt;$HOME&lt;/span&gt;&lt;span&gt;/.cargo/env&quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;git&lt;/span&gt;&lt;span&gt; clone&lt;/span&gt;&lt;span&gt; --depth&lt;/span&gt;&lt;span&gt; 1&lt;/span&gt;&lt;span&gt; --branch&lt;/span&gt;&lt;span&gt; v0.43.0&lt;/span&gt;&lt;span&gt; https://github.com/rtk-ai/rtk.git&lt;/span&gt;&lt;span&gt; /tmp/rtk-build&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;cd&lt;/span&gt;&lt;span&gt; /tmp/rtk-build&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;cargo&lt;/span&gt;&lt;span&gt; build&lt;/span&gt;&lt;span&gt; --release&lt;/span&gt;&lt;span&gt;   # 本机大约几分钟&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;install&lt;/span&gt;&lt;span&gt; -m&lt;/span&gt;&lt;span&gt; 755&lt;/span&gt;&lt;span&gt; target/release/rtk&lt;/span&gt;&lt;span&gt; ~/.local/bin/rtk&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;install&lt;/span&gt;&lt;span&gt; -m&lt;/span&gt;&lt;span&gt; 755&lt;/span&gt;&lt;span&gt; target/release/rtk&lt;/span&gt;&lt;span&gt; /usr/local/bin/rtk&lt;/span&gt;&lt;span&gt;   # gateway PATH 更稳&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;rtk&lt;/span&gt;&lt;span&gt; --version&lt;/span&gt;&lt;span&gt;   # rtk 0.43.0&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;源码编出来的依赖大约到 &lt;strong&gt;GLIBC_2.34&lt;/strong&gt;，本机 2.36 没问题。&lt;/p&gt;
+&lt;p&gt;注意：crates.io 上还有个同名「Rust Type Kit」。装完务必：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;rtk&lt;/span&gt;&lt;span&gt; gain&lt;/span&gt;&lt;span&gt;    # 有 token 统计表头才是对的 rtk&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;对接 Hermes&lt;a href=&quot;#对接-hermes&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;# 建议先备份&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;cp&lt;/span&gt;&lt;span&gt; -a&lt;/span&gt;&lt;span&gt; ~/.hermes/config.yaml&lt;/span&gt;&lt;span&gt; ~/.hermes/config.yaml.bak.rtk&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;rtk&lt;/span&gt;&lt;span&gt; init&lt;/span&gt;&lt;span&gt; --agent&lt;/span&gt;&lt;span&gt; hermes&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;会做两件事：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;写入 &lt;code&gt;~/.hermes/plugins/rtk-rewrite/&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;__init__.py&lt;/code&gt;：钩 &lt;code&gt;pre_tool_call&lt;/code&gt;，对 &lt;code&gt;terminal&lt;/code&gt; 调 &lt;code&gt;rtk rewrite&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;plugin.yaml&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;在 &lt;code&gt;config.yaml&lt;/code&gt; 加上：&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;plugins&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;  enabled&lt;/span&gt;&lt;span&gt;:&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;    - &lt;/span&gt;&lt;span&gt;rtk-rewrite&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;插件逻辑很薄：PATH 里找不到 &lt;code&gt;rtk&lt;/code&gt; 就不注册钩子；rewrite 失败、非 &lt;code&gt;terminal&lt;/code&gt;、已经是 &lt;code&gt;rtk …&lt;/code&gt;、复合命令等——&lt;strong&gt;原命令执行&lt;/strong&gt;。不会把整机搞瘫。&lt;/p&gt;
+&lt;h2&gt;踩坑 2：插件要 gateway 重启；会话里不能重启&lt;a href=&quot;#踩坑-2插件要-gateway-重启会话里不能重启&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;插件是进程启动时加载的。装完必须：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;systemctl&lt;/span&gt;&lt;span&gt; --user&lt;/span&gt;&lt;span&gt; restart&lt;/span&gt;&lt;span&gt; hermes-gateway&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;# 或&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;hermes&lt;/span&gt;&lt;span&gt; gateway&lt;/span&gt;&lt;span&gt; restart&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;必须在 SSH / 本机 shell 跑。&lt;/strong&gt;&lt;br /&gt;
+在 Telegram 里让 Hermes 自己 &lt;code&gt;restart gateway&lt;/code&gt;，会被拦——gateway 不能杀自己的父进程树。这是特性，不是 bug。&lt;/p&gt;
+&lt;p&gt;重启后核对：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;systemctl&lt;/span&gt;&lt;span&gt; --user&lt;/span&gt;&lt;span&gt; is-active&lt;/span&gt;&lt;span&gt; hermes-gateway&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;hermes&lt;/span&gt;&lt;span&gt; plugins&lt;/span&gt;&lt;span&gt; list&lt;/span&gt;&lt;span&gt; |&lt;/span&gt;&lt;span&gt; grep&lt;/span&gt;&lt;span&gt; rtk&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;# 应看到：rtk-rewrite  enabled  user&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;# gateway 进程环境里也能找到 rtk&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;# PATH 里应有 /usr/local/bin 或 ~/.local/bin&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;验收（别只看「装上了」）&lt;a href=&quot;#验收别只看装上了&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;h3&gt;1）rewrite&lt;a href=&quot;#1rewrite&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;rtk&lt;/span&gt;&lt;span&gt; rewrite&lt;/span&gt;&lt;span&gt; &apos;git status&apos;&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;# → rtk git status&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;2）输出真的变短&lt;a href=&quot;#2输出真的变短&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;同仓库对比（数字因仓库状态会变，看趋势即可）：&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;命令&lt;/th&gt;&lt;th&gt;原始&lt;/th&gt;&lt;th&gt;rtk&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;git status&lt;/code&gt;&lt;/td&gt;&lt;td&gt;~618 B&lt;/td&gt;&lt;td&gt;~134 B&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;docker ps&lt;/code&gt;&lt;/td&gt;&lt;td&gt;~737 B&lt;/td&gt;&lt;td&gt;~287 B&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;h3&gt;3）插件钩子（不启 gateway 也能单测）&lt;a href=&quot;#3插件钩子不启-gateway-也能单测&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;# 加载 ~/.hermes/plugins/rtk-rewrite/__init__.py&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;# _pre_tool_call(tool_name=&apos;terminal&apos;, args={&apos;command&apos;:&apos;git status&apos;})&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;# → args[&apos;command&apos;] == &apos;rtk git status&apos;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;4）运行时&lt;a href=&quot;#4运行时&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;hermes plugins list&lt;/code&gt; 里 &lt;strong&gt;enabled&lt;/strong&gt;，gateway &lt;strong&gt;active&lt;/strong&gt;，且 gateway 的 &lt;code&gt;PATH&lt;/code&gt; 能 &lt;code&gt;which rtk&lt;/code&gt;。&lt;br /&gt;
+缺 PATH 时插件 fail-open，看起来像「装了但没生效」。&lt;/p&gt;
+&lt;h2&gt;它不会帮你什么&lt;a href=&quot;#它不会帮你什么&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;写清楚边界，免得期待错位：&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;会&lt;/th&gt;&lt;th&gt;不会&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;压缩 &lt;strong&gt;terminal 命令输出&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;压缩 system prompt / skills 索引&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;自动改写常见 git/docker/pytest…&lt;/td&gt;&lt;td&gt;改写 &lt;code&gt;read_file&lt;/code&gt; / &lt;code&gt;search_files&lt;/code&gt; 等内置工具&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;fail-open，坏了还能用&lt;/td&gt;&lt;td&gt;替代 &lt;code&gt;compression.threshold&lt;/code&gt;、裁 MCP 等整体 token 治理&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;p&gt;和「压缩阈值调到 0.5」「关掉 0 调用的大 MCP」是&lt;strong&gt;互补&lt;/strong&gt;关系，不是二选一。&lt;/p&gt;
+&lt;h2&gt;卸载&lt;a href=&quot;#卸载&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;rtk&lt;/span&gt;&lt;span&gt; init&lt;/span&gt;&lt;span&gt; --uninstall&lt;/span&gt;&lt;span&gt; --agent&lt;/span&gt;&lt;span&gt; hermes&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;# 需要的话再删二进制&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;# rm -f ~/.local/bin/rtk /usr/local/bin/rtk&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;小结&lt;a href=&quot;#小结&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;RTK 值得接 Hermes&lt;/strong&gt;：官方插件、路径清晰、对 terminal 重用户收益直观。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;aarch64 + 旧 glibc 别死磕预编译&lt;/strong&gt;，直接 &lt;code&gt;cargo build --release&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;双路径安装&lt;/strong&gt;（&lt;code&gt;~/.local/bin&lt;/code&gt; + &lt;code&gt;/usr/local/bin&lt;/code&gt;）省得 gateway PATH 踩坑。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;gateway 在会话外重启&lt;/strong&gt;，再用 &lt;code&gt;plugins list&lt;/code&gt; + 一次真实 &lt;code&gt;git status&lt;/code&gt; 验收。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;折腾半下午，换来的是以后每一次 &lt;code&gt;docker ps&lt;/code&gt; 少塞一截废话进上下文——对长期挂着的 agent 来说，这比再装一百个 skill 实在。&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;em&gt;事实基于本机 2026-07-15 实装记录；版本与路径以你环境为准。欢迎 star &lt;a href=&quot;https://github.com/rtk-ai/rtk&quot;&gt;rtk&lt;/a&gt; 和 &lt;a href=&quot;https://github.com/NousResearch/hermes-agent&quot;&gt;Hermes&lt;/a&gt;，不欢迎催更本站。&lt;/em&gt;&lt;/p&gt;</content:encoded><category>category:笔记</category><category>tag:Hermes</category><category>tag:RTK</category><category>tag:AI Agent</category><category>tag:运维</category><category>tag:token</category></item><item><title>使用wrangler创建hono的Worker</title><link>https://blog.xn--ug8h.eu.org/post/note/%E4%BD%BF%E7%94%A8wrangler%E5%88%9B%E5%BB%BAhono%E7%9A%84worker</link><guid isPermaLink="false">note/使用wrangler创建hono的worker</guid><description>Cloudflare Workers 是 Cloudflare 提供的一项服务，它允许您在 Cloudflare 的全球网络边缘运行 JavaScript</description><pubDate>Wed, 11 Dec 2024 04:00:00 GMT</pubDate><content:encoded>&lt;h3&gt;如何使用Cloudflare Workers&lt;a href=&quot;#如何使用cloudflare-workers&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
 &lt;p&gt;Cloudflare Workers 是 Cloudflare 提供的一项服务，它允许您在 Cloudflare 的全球网络边缘运行 JavaScript (和其他兼容 WebAssembly 的语言) 代码。这意味着您可以编写代码，它会在接近用户的位置执行，从而降低延迟并提高性能。Workers 特别适合构建各种网络应用程序和API，以及修改现有的网站请求和响应。&lt;/p&gt;
 &lt;h4&gt;1. 安装Wrangler环境&lt;a href=&quot;#1-安装wrangler环境&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h4&gt;
 &lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;npm&lt;/span&gt;&lt;span&gt; install&lt;/span&gt;&lt;span&gt; -g&lt;/span&gt;&lt;span&gt; @cloudflare/wrangler&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
