@@ -5,7 +5,7 @@ tags:
 - Life
 categories:
 - 随笔
-cover: /img/cover/4.webp
+cover: /img/cover/1.webp
 description: Hello World and hello to you
 draft: false
 ---

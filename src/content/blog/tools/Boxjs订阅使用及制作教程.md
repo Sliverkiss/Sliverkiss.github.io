@@ -5,7 +5,7 @@ tags:
 - Code
 categories:
 - 工具
-cover: /img/cover/2.webp
+cover: /img/cover/8.webp
 description: 记录一次简易的Boxjs订阅使用及制作教程
 draft: false
 ---

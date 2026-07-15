@@ -5,7 +5,7 @@ tags:
 - Code
 categories:
 - 笔记
-cover: /img/cover/1.webp
+cover: /img/cover/2.webp
 description: 记录一次简单美化Alist网盘的过程
 draft: false
 ---

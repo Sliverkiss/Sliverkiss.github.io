@@ -5,7 +5,7 @@ tags:
 - Code
 categories:
 - 笔记
-cover: /img/cover/5.webp
+cover: /img/cover/4.webp
 description: 记录一次将没有公网ip的本地服务器通过cloudlfare内网穿透到公网的过程
 draft: false
 ---

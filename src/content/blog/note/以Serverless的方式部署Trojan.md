@@ -5,7 +5,7 @@ tags:
 - cloudflare
 categories:
 - 笔记
-cover: /img/cover/7.webp
+cover: /img/cover/6.webp
 description: 1. cloudflare账户
 draft: false
 ---

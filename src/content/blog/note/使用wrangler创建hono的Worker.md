@@ -5,7 +5,7 @@ tags:
 - cloudflare
 categories:
 - 笔记
-cover: /img/cover/8.webp
+cover: /img/cover/7.webp
 description: Cloudflare Workers 是 Cloudflare 提供的一项服务，它允许您在 Cloudflare 的全球网络边缘运行 JavaScript
 draft: false
 ---

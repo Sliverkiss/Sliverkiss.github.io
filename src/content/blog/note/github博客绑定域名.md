@@ -5,7 +5,7 @@ tags:
 - Code
 categories:
 - 笔记
-cover: /img/cover/6.webp
+cover: /img/cover/5.webp
 description: 记录一次将github的静态博客绑定到自己的域名的过程
 draft: false
 ---
