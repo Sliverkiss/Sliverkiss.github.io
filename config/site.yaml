@@ -23,12 +23,17 @@ site:
   defaultOgImage: /img/avatar.webp # 默认 Open Graph 图片
   startYear: 2023 # 建站年份
   timezone: Asia/Shanghai # 时区配置 (IANA 格式)，用于日期显示和处理
+  # Google Search Console 验证：在 search.google.com/search-console 添加网址资源后，
+  # 选择「HTML 标记」验证，把 content="..." 里的字符串填到下面，然后重新部署。
+  googleSiteVerification: '' # 例如: AbCdEf123456xyz
   keywords: # SEO 关键词 (全局)
     - 博客
     - Sliverkiss
     - 技术
     - 运维
     - Cloudflare
+    - AI
+    - 自动化
 
 # =============================================================================
 # Internationalization (i18n)
@@ -552,12 +557,15 @@ analytics:
 # -----------------------------------------------------------------------------
 seo:
   robots:
-    # policy:                          # 爬虫策略（可选，取消注释并配置）
-    #   - userAgent: '*'
-    #     allow: '/'
-    #     disallow:
-    #       - '/api/'
-    # host: true                       # 可选：添加 Host 指令（Yandex）
+    policy:
+      - userAgent: '*'
+        allow: '/'
+        disallow:
+          - '/api/'
+          - '/_astro/'
+    # host: true                       # 可选：Yandex Host 指令
+    # sitemap 由 @astrojs/sitemap 生成：/sitemap-index.xml
+    # Google Search Console 验证：把 meta 验证码填到 site.googleSiteVerification
 
 # =============================================================================
 # Christmas/Seasonal Features

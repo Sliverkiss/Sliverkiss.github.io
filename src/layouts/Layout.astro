@@ -124,7 +124,13 @@ const keywords = keywordsOverride || siteConfig.keywords || [siteConfig.title];
         ...(ogImage && { image: ogImage }),
       }}
       extend={{
-        meta: [{ name: 'author', content: siteConfig.author || '' }],
+        meta: [
+          { name: 'author', content: siteConfig.author || '' },
+          // Google Search Console site verification (optional)
+          ...(siteConfig.googleSiteVerification
+            ? [{ name: 'google-site-verification', content: siteConfig.googleSiteVerification }]
+            : []),
+        ],
       }}
     />
     {/* astro-seo 暂不支持管理 keywords */}

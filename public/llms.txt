@@ -1,0 +1,14 @@
+# Sliverkiss Blog
+
+> 这里是 Sliverkiss 的个人博客，记录技术折腾、自动化脚本与 AI 工具实践。
+
+站点: https://blog.xn--ug8h.eu.org/
+作者: Sliverkiss
+RSS: https://blog.xn--ug8h.eu.org/rss.xml
+Sitemap: https://blog.xn--ug8h.eu.org/sitemap-index.xml
+
+## 主要栏目
+
+- 随笔 / 笔记 / 工具教程
+- 关于: https://blog.xn--ug8h.eu.org/about/
+- 归档: https://blog.xn--ug8h.eu.org/archives/
