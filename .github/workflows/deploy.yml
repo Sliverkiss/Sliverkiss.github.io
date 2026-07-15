@@ -19,14 +19,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "pnpm"
+
+      - name: Enable corepack pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.15.9 --activate
+          pnpm --version
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
@@ -40,8 +42,23 @@ jobs:
           touch dist/.nojekyll
 
       - name: Deploy to pages branch
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: pages
-          folder: dist
-          clean: true
+        run: |
+          set -euo pipefail
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          DEPLOY_DIR=$(mktemp -d)
+          git clone --depth 1 --branch pages "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$DEPLOY_DIR" \
+            || (git clone --depth 1 "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$DEPLOY_DIR" && cd "$DEPLOY_DIR" && git checkout --orphan pages)
+          cd "$DEPLOY_DIR"
+          # keep only git metadata
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+          cp -a "$GITHUB_WORKSPACE/dist/." .
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to deploy"
+            exit 0
+          fi
+          git commit -m "deploy: ${GITHUB_SHA}"
+          git push -f origin HEAD:pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
