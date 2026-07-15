@@ -17,7 +17,7 @@ site:
   name: Sliverkiss # 作者名称
   description: 这里是 Sliverkiss 的个人博客，与你一起发现更大的世界 # 网站描述
   avatar: /img/avatar.webp # 网站头像
-  showLogo: true # 是否显示 Logo
+  showLogo: false # 是否显示 Logo（false=显示文字 sliverkiss，不用主题作者 logo）
   author: Sliverkiss # 作者名称
   url: https://blog.xn--ug8h.eu.org # 站点 URL
   defaultOgImage: /img/avatar.webp # 默认 Open Graph 图片
