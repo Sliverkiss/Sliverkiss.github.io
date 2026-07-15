@@ -51,6 +51,9 @@
                                                     <a href="/rss.xml" target="_blank" class="social-btn rss" title="Rss">
                                                         <i class="ri-rss-line"></i>
                                                     </a>
+                                                    <a href="https://t.me/sliverkiss" target="_blank" class="social-btn telegram" title="Telegram">
+                                                        <i class="ri-telegram-fill"></i>
+                                                    </a>
                                 </div>
                             </div>
 
