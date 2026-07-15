@@ -1,0 +1,158 @@
+---
+import { commentConfig } from "@/config";
+
+interface Props {
+	path: string;
+}
+
+const config = {
+	...commentConfig.twikoo,
+	el: "#tcomment",
+	path: Astro.props.path,
+};
+---
+
+<div id="twikoo-container" class="twikoo-container">
+	<div id="tcomment"></div>
+</div>
+
+<script is:inline define:vars={{ config }}>
+	(function () {
+		const TWIKOO_CONTAINER_ID = "twikoo-container";
+		const TWIKOO_SCRIPT_URL = "/assets/js/twikoo.all.min.js";
+		const ROOT_MARGIN = "200px";
+
+		let observer = null;
+		let twikooLoaded = false;
+
+		function getCurrentPath() {
+			const pathname = window.location.pathname;
+			return pathname.endsWith("/") && pathname.length > 1
+				? pathname.slice(0, -1)
+				: pathname;
+		}
+
+		function createTwikooConfig() {
+			return {
+				...config,
+				path: getCurrentPath(),
+				el: "#tcomment",
+			};
+		}
+
+		async function loadTwikooScript() {
+			if (
+				twikooLoaded ||
+				document.getElementById("twikoo-script-loaded")
+			) {
+				return;
+			}
+			return new Promise((resolve, reject) => {
+				const script = document.createElement("script");
+				script.id = "twikoo-script-loaded";
+				script.src = TWIKOO_SCRIPT_URL;
+				script.async = true;
+				script.onload = () => {
+					twikooLoaded = true;
+					resolve();
+				};
+				script.onerror = reject;
+				document.head.appendChild(script);
+			});
+		}
+
+		async function initTwikoo() {
+			const commentEl = document.getElementById("tcomment");
+			if (!commentEl) {
+				return;
+			}
+
+			try {
+				await loadTwikooScript();
+
+				if (typeof twikoo === "undefined") {
+					console.warn("[Twikoo] 脚本加载失败");
+					return;
+				}
+
+				commentEl.innerHTML = "";
+				const dynamicConfig = createTwikooConfig();
+				await twikoo.init(dynamicConfig);
+			} catch (error) {
+				console.error("[Twikoo] 初始化失败:", error);
+			}
+		}
+
+		function cleanup() {
+			if (observer) {
+				observer.disconnect();
+				observer = null;
+			}
+			if (window.swup?.hooks) {
+				window.swup.hooks.off("content:replace", initTwikoo);
+			}
+		}
+
+		function setupLazyLoad() {
+			const container = document.getElementById(TWIKOO_CONTAINER_ID);
+			if (!container) {
+				return;
+			}
+
+			observer = new IntersectionObserver(
+				(entries) => {
+					if (entries[0].isIntersecting) {
+						observer.disconnect();
+						observer = null;
+						initTwikoo();
+					}
+				},
+				{ rootMargin: ROOT_MARGIN },
+			);
+
+			observer.observe(container);
+		}
+
+		function setupSwupHooks() {
+			if (window.swup?.hooks) {
+				window.swup.hooks.on("content:replace", () => {
+					setTimeout(setupLazyLoad, 200);
+				});
+			} else {
+				document.addEventListener(
+					"swup:enable",
+					() => {
+						if (window.swup?.hooks) {
+							window.swup.hooks.on("content:replace", () => {
+								setTimeout(setupLazyLoad, 200);
+							});
+						}
+					},
+					{ once: true },
+				);
+			}
+		}
+
+		document.addEventListener("mizuki:page:loaded", () => {
+			setupLazyLoad();
+		});
+
+		window.addEventListener("beforeunload", cleanup);
+
+		if (document.readyState === "loading") {
+			document.addEventListener("DOMContentLoaded", () => {
+				setupLazyLoad();
+				setupSwupHooks();
+			});
+		} else {
+			setupLazyLoad();
+			setupSwupHooks();
+		}
+	})();
+</script>
+
+<style>
+	.twikoo-container {
+		min-height: 200px;
+	}
+</style>

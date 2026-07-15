@@ -1,0 +1,213 @@
+---
+import { PhotoCard } from "@components/features/albums";
+import PasswordProtection from "@components/features/auth/PasswordProtection.astro";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { encryptContent } from "@utils/crypto-utils";
+import { Icon } from "astro-icon/components";
+
+import { siteConfig } from "../../../config";
+import I18nKey from "../../../i18n/i18nKey";
+import { i18n } from "../../../i18n/translation";
+import type { AlbumGroup, Photo } from "../../../types/album";
+import { scanAlbums } from "../../../utils/album-scanner";
+
+if (!siteConfig.featurePages.albums) {
+	return Astro.redirect("/404/");
+}
+
+export const getStaticPaths = async () => {
+	const albumsData = await scanAlbums();
+	return albumsData.map((album) => ({
+		params: { id: album.id },
+		props: { album },
+	}));
+};
+
+interface Props {
+	album: AlbumGroup;
+}
+
+const { album } = Astro.props;
+
+if (!album) {
+	return Astro.redirect("/404/");
+}
+
+const isEncrypted = !!album.password;
+let encryptedPhotoData = "";
+if (isEncrypted) {
+	const photoHtml = album.photos
+		.map(
+			(photo: Photo) =>
+				`<div class="gallery-masonry-item"><a data-fancybox="album-${album.id}" href="${photo.src}" data-caption="${photo.alt || photo.title || ""}"><img src="${photo.src}" alt="${photo.alt || photo.title || ""}" loading="lazy" decoding="async" class="w-full rounded-lg" /></a></div>`,
+		)
+		.join("");
+	const wrappedHtml = `<div class="gallery-masonry">${photoHtml}</div>`;
+	encryptedPhotoData = encryptContent(
+		wrappedHtml,
+		String(album.password),
+		`album:${album.id}`,
+	);
+}
+---
+
+<MainGridLayout
+	title={album.title}
+	description={album.description || album.title}
+>
+	<script>
+		import("../../../scripts/right-sidebar-layout.js");
+		import { loadIconify } from "../../../utils/icon-loader";
+
+		loadIconify().catch((error) => {
+			console.error("Failed to load Iconify:", error);
+		});
+	</script>
+
+	<!-- Cover Banner -->
+	<div class="w-full rounded-(--radius-large) overflow-hidden relative">
+		{
+			album.cover ? (
+				<div class="relative w-full aspect-3/1 min-h-50 max-h-90">
+					<img
+						src={album.cover}
+						alt={album.title}
+						class="w-full h-full object-cover"
+					/>
+					<div class="absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-transparent" />
+
+					{/* Back button */}
+					<a
+						href="/albums/"
+						class="absolute top-4 left-4 inline-flex items-center gap-1.5 text-sm text-white/90 hover:text-white bg-black/30 hover:bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-lg transition-colors"
+					>
+						<Icon
+							name="material-symbols:arrow-back"
+							class="text-base"
+						/>
+						{i18n(I18nKey.albumsBackToList)}
+					</a>
+
+					{/* Album info overlay */}
+					<div class="absolute bottom-0 left-0 right-0 p-6">
+						<div class="text-2xl sm:text-3xl font-bold text-white mb-2 drop-shadow-lg">
+							{album.title}
+						</div>
+						{album.description && (
+							<p class="text-sm text-white/75 leading-relaxed mb-2 max-w-2xl line-clamp-2">
+								{album.description}
+							</p>
+						)}
+						<div class="flex items-center gap-4 text-sm text-white/80 flex-wrap">
+							<span class="inline-flex items-center gap-1">
+								<Icon
+									name="material-symbols:calendar-today"
+									class="text-sm"
+								/>
+								{new Date(album.date).toLocaleDateString(
+									"zh-CN",
+								)}
+							</span>
+							{album.location && (
+								<span class="inline-flex items-center gap-1">
+									<Icon
+										name="material-symbols:location-on"
+										class="text-sm"
+									/>
+									{album.location}
+								</span>
+							)}
+							<span class="inline-flex items-center gap-1">
+								<Icon
+									name="material-symbols:photo-library"
+									class="text-sm"
+								/>
+								{album.photos.length}{" "}
+								{i18n(I18nKey.albumsPhotosCount)}
+							</span>
+						</div>
+						{album.tags && album.tags.length > 0 && (
+							<div class="flex flex-wrap gap-1.5 mt-2.5">
+								{album.tags.map((tag: string) => (
+									<span class="text-xs px-2 py-0.5 rounded bg-white/20 text-white/90 backdrop-blur-sm">
+										{tag}
+									</span>
+								))}
+							</div>
+						)}
+					</div>
+				</div>
+			) : (
+				<div class="card-base px-6 py-4">
+					<a
+						href="/albums/"
+						class="inline-flex items-center gap-1 text-sm text-(--primary) hover:underline mb-3"
+					>
+						<Icon
+							name="material-symbols:arrow-back"
+							class="text-base"
+						/>
+						{i18n(I18nKey.albumsBackToList)}
+					</a>
+					<div class="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+						{album.title}
+					</div>
+					<div class="flex items-center gap-4 text-sm text-neutral-500 dark:text-neutral-400 mt-2 flex-wrap">
+						<span class="inline-flex items-center gap-1">
+							<Icon
+								name="material-symbols:calendar-today"
+								class="text-sm"
+							/>
+							{new Date(album.date).toLocaleDateString("zh-CN")}
+						</span>
+						{album.location && (
+							<span class="inline-flex items-center gap-1">
+								<Icon
+									name="material-symbols:location-on"
+									class="text-sm"
+								/>
+								{album.location}
+							</span>
+						)}
+						<span>
+							{album.photos.length}{" "}
+							{i18n(I18nKey.albumsPhotosCount)}
+						</span>
+					</div>
+				</div>
+			)
+		}
+	</div>
+
+	<!-- Photo Masonry Grid -->
+	<div class="w-full rounded-(--radius-large) overflow-hidden relative mt-4">
+		<div class="card-base z-10 px-6 py-6 relative w-full">
+			{
+				isEncrypted ? (
+					<PasswordProtection
+						encryptedContent={encryptedPhotoData}
+						hint={album.passwordHint}
+					/>
+				) : album.photos.length > 0 ? (
+					<div class="gallery-masonry">
+						{album.photos.map((photo: Photo) => (
+							<PhotoCard
+								src={photo.src}
+								alt={photo.alt || photo.title || ""}
+								albumId={album.id}
+							/>
+						))}
+					</div>
+				) : (
+					<div class="flex flex-col items-center justify-center py-16 text-neutral-400 dark:text-neutral-500">
+						<Icon
+							name="material-symbols:photo-library"
+							class="text-6xl mb-4 opacity-50"
+						/>
+						<p class="text-lg">{i18n(I18nKey.albumsEmpty)}</p>
+					</div>
+				)
+			}
+		</div>
+	</div>
+</MainGridLayout>

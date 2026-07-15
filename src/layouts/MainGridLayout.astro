@@ -1,0 +1,327 @@
+---
+import FloatingControls from "@components/control/FloatingControls.astro";
+import { SidebarTOC } from "@components/features/toc";
+import Banner from "@components/layout/Banner.astro";
+import RightSideBar from "@components/layout/RightSideBar.astro";
+import FullscreenWallpaper from "@components/misc/FullscreenWallpaper.astro";
+import IconifyLoader from "@components/misc/IconifyLoader.astro";
+import Footer from "@components/organisms/footer/Footer.astro";
+import Navbar from "@components/organisms/navigation/Navbar.astro";
+import SideBar from "@components/widgets/sidebar/SideBar.astro";
+import type { MarkdownHeading } from "astro";
+import { Icon } from "astro-icon/components";
+
+import { fullscreenWallpaperConfig, siteConfig } from "../config";
+import {
+	BANNER_HEIGHT,
+	BANNER_HEIGHT_FULLSCREEN,
+} from "../constants/constants";
+import { formatDateToYYYYMMDD } from "../utils/date-utils";
+import {
+	calculateGridLayout,
+	getBannerImages,
+	getMainPanelTop,
+	getTransparencyClass,
+	shouldEnableTransparency,
+} from "../utils/grid-layout-utils";
+import { widgetManager } from "../utils/widget-manager";
+import Layout from "./Layout.astro";
+import GridScripts from "./partials/GridScripts.astro";
+
+interface Props {
+	title?: string;
+	banner?: string;
+	description?: string;
+	lang?: string;
+	setOGTypeArticle?: boolean;
+	postSlug?: string;
+	headings?: MarkdownHeading[];
+	coverImage?: string;
+	publishedDate?: Date;
+	category?: string;
+	wordCount?: number;
+}
+
+// 获取 banner 图片
+const bannerImages = await getBannerImages(siteConfig);
+
+const {
+	title,
+	banner,
+	description,
+	lang,
+	setOGTypeArticle,
+	postSlug,
+	coverImage,
+	headings = [],
+	publishedDate,
+	category,
+	wordCount,
+} = Astro.props;
+const hasBannerCredit = siteConfig.banner.credit.enable;
+const hasBannerLink = !!siteConfig.banner.credit.url;
+
+// 检查是否为首页
+const isHomePage = Astro.url.pathname === "/" || Astro.url.pathname === "";
+// 手机端非首页不显示banner的CSS类
+const mobileNonHomeBannerClass = !isHomePage ? "mobile-hide-banner" : "";
+
+// 计算主内容区域位置
+const finalMainPanelTop = getMainPanelTop(
+	siteConfig.wallpaperMode.defaultMode,
+	BANNER_HEIGHT,
+	BANNER_HEIGHT_FULLSCREEN,
+);
+
+// 计算网格布局
+const {
+	gridCols,
+	sidebarClass,
+	rightSidebarClass,
+	mainContentClass,
+	sidebarPresence,
+	mobileShowSidebar,
+	tabletShowSidebar,
+	desktopShowSidebar,
+} = calculateGridLayout({
+	siteConfig,
+	widgetManager,
+});
+
+const { hasRightSidebarComponents, hasMobileDrawerComponents } =
+	sidebarPresence;
+
+// 半透明效果
+const shouldEnable = shouldEnableTransparency(
+	siteConfig.wallpaperMode.defaultMode,
+);
+const transparentClass = getTransparencyClass(shouldEnable);
+
+// 布局模式
+const defaultPostListLayout = siteConfig.postListLayout?.defaultMode || "list";
+---
+
+<Layout
+	title={title}
+	banner={banner}
+	description={description}
+	lang={lang}
+	setOGTypeArticle={setOGTypeArticle}
+	postSlug={postSlug}
+	coverImage={coverImage}
+>
+	<GridScripts
+		navbarTransparentMode={siteConfig.banner?.navbar?.transparentMode ||
+			"semi"}
+		defaultWallpaperMode={siteConfig.wallpaperMode.defaultMode}
+		defaultPostListLayout={siteConfig.postListLayout?.defaultMode || "list"}
+		BANNER_HEIGHT={BANNER_HEIGHT}
+		BANNER_HEIGHT_FULLSCREEN={BANNER_HEIGHT_FULLSCREEN}
+		pageScaling={siteConfig.pageScaling}
+		wavesEnabled={siteConfig.banner?.waves?.enable ?? true}
+		bannerTitleEnabled={siteConfig.banner?.homeText?.enable ?? true}
+		wallpaperEnabled={fullscreenWallpaperConfig.enable ?? true}
+		postListLayoutEnabled={siteConfig.postListLayout?.enable ?? true}
+	/>
+
+	<!-- 全屏壁纸 - 始终渲染，通过 JS 控制显示隐藏 -->
+	<FullscreenWallpaper config={fullscreenWallpaperConfig} />
+
+	<!-- 全局图标加载器 -->
+	<IconifyLoader />
+
+	<!-- Navbar -->
+	<slot slot="head" name="head" />
+	<div
+		id="top-row"
+		class="z-50 pointer-events-none relative transition-all duration-700 max-w-(--page-width) px-0 md:px-4 mx-auto"
+		class:list={[""]}
+	>
+		<div
+			id="navbar-wrapper"
+			class="pointer-events-auto sticky top-0 transition-all"
+		>
+			<Navbar />
+		</div>
+	</div>
+
+	<!-- Banner 组件 -->
+	<Banner
+		bannerImages={bannerImages}
+		mobileNonHomeBannerClass={mobileNonHomeBannerClass}
+		showTextOverlay={isHomePage &&
+			(siteConfig.banner.homeText?.enable ?? false)}
+	/>
+
+	<!-- Main content -->
+	<div
+		class={`absolute w-full z-30 pointer-events-none ${mobileNonHomeBannerClass ? "mobile-main-no-banner" : ""} ${siteConfig.wallpaperMode.defaultMode === "none" ? "no-banner-layout" : ""} ${transparentClass}`}
+		style={`top: ${finalMainPanelTop}`}
+	>
+		<!-- The pointer-events-none here prevent blocking the click event of the TOC -->
+		<div class="relative max-w-(--page-width) mx-auto pointer-events-auto">
+			<div
+				id="main-grid"
+				class={`transition duration-700 w-full left-0 right-0 grid ${gridCols} grid-rows-none md:grid-rows-[auto] mx-auto gap-4 px-2 md:px-4 ${!mobileShowSidebar || !hasMobileDrawerComponents ? "mobile-no-sidebar" : ""} ${hasRightSidebarComponents ? "mobile-both-sidebar" : ""}`}
+				data-layout-mode={defaultPostListLayout}
+			>
+				<!-- Banner image credit -->
+				{
+					hasBannerCredit && (
+						<a
+							href={siteConfig.banner.credit.url}
+							id="banner-credit"
+							target="_blank"
+							rel="noopener"
+							aria-label="Visit image source"
+							class:list={[
+								"group onload-animation transition-all absolute flex justify-center items-center rounded-full " +
+									"px-3 right-4 -top-13 bg-black/60 hover:bg-black/70 h-9",
+								{
+									"hover:pr-9 active:bg-black/80":
+										hasBannerLink,
+								},
+							]}
+						>
+							<Icon
+								class="text-white/75 text-[1.25rem] mr-1"
+								name="material-symbols:copyright-outline-rounded"
+							/>
+							<div class="text-white/75 text-xs">
+								{siteConfig.banner.credit.text}
+							</div>
+							<Icon
+								class:list={[
+									"transition absolute text-[oklch(0.75_0.14_var(--hue))] right-4 text-[0.75rem] opacity-0",
+									{
+										"group-hover:opacity-100":
+											hasBannerLink,
+									},
+								]}
+								name="fa7-solid:arrow-up-right-from-square"
+							/>
+						</a>
+					)
+				}
+
+				{/* 侧边栏和主内容区域容器 */}
+				<div class="contents">
+					{
+						(mobileShowSidebar ||
+							tabletShowSidebar ||
+							desktopShowSidebar) && (
+							<SideBar
+								class={`${sidebarClass} ${transparentClass}`}
+								headings={headings}
+							/>
+						)
+					}
+
+					{
+						hasRightSidebarComponents && (
+							<div
+								class={`right-sidebar-container ${rightSidebarClass} ${transparentClass}`}
+							>
+								<RightSideBar headings={headings} />
+							</div>
+						)
+					}
+				</div>
+
+				<main
+					id="swup-container"
+					class={`${mainContentClass} transition-main`}
+				>
+					<div
+						id="content-wrapper"
+						class="onload-animation transition-leaving"
+					>
+						<div
+							id="page-overlay-data"
+							data-title={title || ""}
+							data-date={publishedDate ? formatDateToYYYYMMDD(publishedDate) : ""}
+							data-category={category || ""}
+							data-words={wordCount ? String(wordCount) : ""}
+							data-is-post={postSlug ? "true" : "false"}
+							data-is-home={isHomePage ? "true" : "false"}
+							data-wallpaper-mode={siteConfig.wallpaperMode.defaultMode}
+							class="hidden"
+						>
+						</div>
+						<slot />
+						<div
+							class="footer col-span-full onload-animation hidden lg:block"
+						>
+							<Footer />
+						</div>
+					</div>
+				</main>
+
+				<div
+					class="footer col-span-full onload-animation block lg:hidden"
+				>
+					<Footer />
+				</div>
+			</div>
+
+			<FloatingControls headings={headings} />
+		</div>
+	</div>
+
+	<style>
+		.right-sidebar-container {
+			align-self: start;
+			display: contents;
+		}
+
+		.right-sidebar-container #right-sidebar {
+			height: fit-content;
+		}
+	</style>
+
+	<!-- 侧边栏TOC模式 -->
+	{
+		siteConfig.toc.enable && siteConfig.toc.desktopSidebar && (
+			<div class="absolute w-full z-0 hidden 2xl:block">
+				<div class="relative max-w-(--page-width) mx-auto">
+					<div
+						id="toc-wrapper"
+						class:list={[
+							"hidden lg:block transition absolute top-0 w-(--toc-width) items-center",
+							"-right-(--toc-width)",
+							{
+								"toc-hide":
+									siteConfig.wallpaperMode.defaultMode ===
+									"banner",
+							},
+						]}
+					>
+						<div
+							id="toc-inner-wrapper"
+							class="fixed top-14 w-(--toc-width) h-[calc(100vh-6rem)] max-h-[calc(100vh-6rem)] overflow-x-hidden overflow-y-auto"
+						>
+							<div
+								id="toc-container"
+								class="w-full h-full transition-swup-fade"
+							>
+								<SidebarTOC headings={headings} />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		)
+	}
+
+	<!-- 保留此元素以确保Swup正常工作 -->
+	{
+		(!siteConfig.toc.enable || !siteConfig.toc.desktopSidebar) && (
+			<div id="toc-container" class="hidden" />
+		)
+	}
+</Layout>
+
+<!--
+  Banner 和网格布局样式已提取到 src/styles/banner.css
+  该文件通过 src/styles/main.css 导入
+-->

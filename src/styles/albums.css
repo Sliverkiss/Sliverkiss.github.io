@@ -1,0 +1,61 @@
+/* 相册模块样式 */
+
+/* 相册卡片动画 */
+.album-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 瀑布流布局 */
+.gallery-masonry {
+  column-width: 240px;
+  column-gap: 0.75rem;
+}
+
+.gallery-masonry .gallery-photo-card {
+  break-inside: avoid;
+}
+
+/* 照片网格加载动画 */
+.photo-gallery {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* 图片懒加载占位符 - 使用主题色变量 */
+.photo-image[loading="lazy"] {
+  background: linear-gradient(90deg, var(--btn-regular-bg) 25%, var(--card-bg) 50%, var(--btn-regular-bg) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式瀑布流 */
+@media (width < 768px) {
+  .gallery-masonry {
+    column-width: 180px;
+  }
+}
+
+@media (width < 480px) {
+  .gallery-masonry {
+    column-width: 140px;
+  }
+}

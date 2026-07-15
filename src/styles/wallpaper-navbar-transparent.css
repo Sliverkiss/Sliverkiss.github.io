@@ -1,0 +1,155 @@
+/* 集中管理颜色与状态，修改一处即可全局生效 */
+:root {
+  /* --- 基础 Token --- */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --radius-std: 0.75rem;
+
+  /* --- 状态变量 (默认值) --- */
+  --nav-bg: var(--card-bg);
+  --nav-blur: none;
+  --nav-shadow: var(--shadow-sm);
+  --nav-radius: var(--radius-std);
+
+  /* --- 面板变量 (默认跟随 Navbar，特定情况分离) --- */
+  --panel-bg: var(--card-bg-transparent);
+  --panel-blur: blur(20px);
+}
+
+/* Dark Mode 适配 */
+:root.dark {
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+/* --- 滚动透明度控制 (Dynamic Transparent) --- */
+
+/* Semi (毛玻璃) */
+#navbar[data-dynamic-transparent="semi"] {
+  --nav-bg: var(--card-bg-transparent);
+  --nav-blur: blur(8px);
+  --nav-shadow: var(--shadow-lg);
+}
+
+/* None (实心) */
+#navbar[data-dynamic-transparent="none"] {
+  --nav-bg: var(--card-bg);
+  --nav-blur: none;
+  --nav-shadow: var(--shadow-sm);
+
+  /* 联动子面板 */
+  --panel-bg: var(--card-bg);
+  --panel-blur: none;
+}
+
+/* --- 首页 Banner 沉浸式 (Wallpaper Transparent) --- */
+
+/* 桌面端 Full 模式 */
+@media (width >= 1280px) {
+  body.wallpaper-transparent #navbar[data-transparent-mode="full"] {
+    --nav-bg: transparent;
+    --nav-blur: none;
+    --nav-shadow: none;
+    --nav-radius: 0;
+  }
+}
+
+/* 移动端 Full 模式 (仅首页) */
+@media (width < 1280px) {
+  body.wallpaper-transparent #navbar[data-transparent-mode="full"][data-is-home="true"] {
+    --nav-bg: transparent;
+    --nav-blur: none;
+    --nav-shadow: none;
+    --nav-radius: 0;
+  }
+}
+
+/* Semi-Full 混合模式 (未滚动时透明) */
+body.wallpaper-transparent #navbar[data-transparent-mode="semifull"]:not(.scrolled) {
+  --nav-bg: transparent;
+  --nav-blur: none;
+  --nav-shadow: none;
+  --nav-radius: 0;
+}
+/* 移动端首页特殊处理 */
+body.wallpaper-transparent #navbar[data-transparent-mode="semifull"][data-is-home="true"]:not(.scrolled) {
+  --nav-bg: transparent;
+  --nav-blur: none;
+  --nav-shadow: none;
+  --nav-radius: 0;
+}
+
+/* 混合模式滚动后 -> 回归毛玻璃 */
+body.wallpaper-transparent #navbar[data-transparent-mode="semifull"].scrolled {
+  --nav-bg: var(--card-bg-transparent);
+  --nav-blur: blur(8px);
+  --nav-shadow: var(--shadow-lg);
+  --nav-radius: var(--radius-std);
+}
+
+/* 导航栏样式核心 (Navbar Core) */
+#navbar > div {
+  border: none !important;
+  outline: none;
+
+  /* 核心外观由变量驱动 */
+  background: var(--nav-bg);
+  backdrop-filter: var(--nav-blur);
+  box-shadow: var(--nav-shadow);
+  border-radius: var(--nav-radius);
+
+  /* 性能优化 */
+  will-change: background, backdrop-filter, box-shadow;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 子组件样式 (Sub-Components)
+ * 注意：不再强制覆盖 .music-player .mini-player 的背景，
+ * 让其使用自身的 card-base / 主题卡片背景，以保持与主播放器一致。
+ */
+:is(.dropdown-content, #nav-menu-panel, #mobile-toc-panel, #display-setting, #search-panel, .float-panel) {
+  /* 使用面板专用变量 */
+  background: var(--panel-bg);
+  backdrop-filter: var(--panel-blur);
+  box-shadow: var(--shadow-lg);
+  border: none;
+
+  /* 优化过渡 */
+  transition:
+    background 0.3s ease,
+    backdrop-filter 0.3s ease;
+}
+
+/* Banner 模式下的特殊增强 */
+@media (width >= 1280px) {
+  body.wallpaper-transparent :is(.dropdown-content, #display-setting, #search-panel) {
+    background: rgba(255, 255, 255, 0.85);
+  }
+  :root.dark body.wallpaper-transparent :is(.dropdown-content, #display-setting, #search-panel) {
+    background: rgba(24, 25, 38, 0.85);
+  }
+}
+
+@media (width < 1280px) {
+  /* 修正移动端 Navbar 布局 */
+  #navbar > div {
+    border-radius: 0.5rem;
+    margin: 0;
+    width: 100%;
+    max-width: none;
+  }
+
+  /* 搜索框内部颜色处理 */
+  body:has(#navbar[data-dynamic-transparent="none"]) #search-panel #search-bar-inside {
+    background: rgba(0, 0, 0, 0.08);
+  }
+  :root.dark body:has(#navbar[data-dynamic-transparent="none"]) #search-panel #search-bar-inside {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  /* 非首页时，移动端各个弹出面板不透明 */
+  #navbar:not([data-is-home="true"]) :is(#nav-menu-panel, #mobile-toc-panel, #search-panel, #display-setting) {
+    background: var(--card-bg);
+    backdrop-filter: none;
+  }
+}

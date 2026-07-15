@@ -1,0 +1,231 @@
+---
+import DeviceCard from "@components/features/devices/DeviceCard.astro";
+
+import { siteConfig } from "../config";
+import { devicesData } from "../data/devices";
+import I18nKey from "../i18n/i18nKey";
+import { i18n } from "../i18n/translation";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+
+export const prerender = true;
+
+// 检查设备页面是否启用
+if (!siteConfig.featurePages.devices) {
+	return Astro.redirect("/404/");
+}
+
+// 设备数据
+const devices = devicesData;
+const brands = Object.keys(devices);
+const viewDetailsText = i18n(I18nKey.devicesViewDetails);
+---
+
+<MainGridLayout title={i18n(I18nKey.devices)}>
+	<!-- 引入右侧边栏布局管理器 -->
+	<script>
+		import("../scripts/right-sidebar-layout.js");
+	</script>
+	<div
+		class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32"
+	>
+		<div class="card-base z-10 px-9 py-6 relative w-full">
+			<!-- 页面标题 -->
+			<div class="flex flex-col items-start justify-center mb-8">
+				<h1
+					class="text-4xl font-bold text-black/90 dark:text-white/90 mb-2 relative before:w-1 before:h-8 before:rounded-md before:bg-(--primary) before:absolute before:top-1/2 before:-translate-y-1/2 before:-left-4"
+				>
+					{i18n(I18nKey.devices)}
+				</h1>
+				<p class="text-lg text-black/60 dark:text-white/60">
+					{i18n(I18nKey.devicesSubtitle)}
+				</p>
+			</div>
+
+			<!-- 过滤按钮 -->
+			<div class="mb-6">
+				<div class="filter-container flex flex-wrap gap-2">
+					{
+						brands.map((brand, index) => (
+							<button
+								data-brand={brand}
+								class={`filter-tag px-6 py-2.5 rounded-lg font-medium transition-all ${
+									index === 0 ? "active" : ""
+								}`}
+							>
+								{brand}
+							</button>
+						))
+					}
+				</div>
+			</div>
+
+			<!-- 设备列表 -->
+			<div
+				id="devices-container"
+				class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+			>
+				{
+					brands.length > 0 &&
+						devices[brands[0]].map((device, index) => (
+							<DeviceCard
+								device={device}
+								index={index}
+								viewDetailsText={viewDetailsText}
+							/>
+						))
+				}
+			</div>
+
+			<!-- 隐藏数据用于客户端渲染 -->
+			<script
+				is:inline
+				id="devices-data"
+				type="application/json"
+				set:html={JSON.stringify(devices)}
+			/>
+			<script
+				is:inline
+				id="i18n-data"
+				type="application/json"
+				set:html={JSON.stringify({ viewDetails: viewDetailsText })}
+			/>
+		</div>
+	</div>
+
+	<!-- 使用全局脚本，确保 swup 切换后仍能重新初始化 -->
+	<script is:inline src="/js/devices-page-handler.js"></script>
+</MainGridLayout>
+
+<style>
+	.filter-container {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		margin-bottom: 1rem;
+	}
+
+	.filter-tag {
+		padding: 0.625rem 1.25rem;
+		border: 1px solid var(--line-divider);
+		border-radius: var(--radius-large);
+		background: var(--btn-regular-bg);
+		color: var(--btn-content);
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		white-space: nowrap;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.filter-tag::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: var(--primary);
+		opacity: 0;
+		transition: opacity 0.3s ease;
+		z-index: -1;
+	}
+
+	.filter-tag:hover:not(.active) {
+		background: var(--btn-hover-bg);
+		border-color: var(--primary);
+		transform: translateY(-2px);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.filter-tag.active {
+		background: var(--primary);
+		color: white;
+		border-color: var(--primary);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
+	}
+
+	.filter-tag.active:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 6px 16px rgba(var(--color-primary-rgb), 0.4);
+	}
+
+	/* 设备卡片动画效果 */
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.onload-animation {
+		animation: fadeInUp 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+		opacity: 0;
+	}
+
+	/* 卡片内容文本截断 */
+	.line-clamp-2 {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	/* 设备卡片微妙的悬停效果 */
+	.device-card::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		border-radius: 0.75rem;
+		background: linear-gradient(
+			135deg,
+			rgba(var(--color-primary-rgb), 0.05),
+			transparent
+		);
+		opacity: 0;
+		transition: opacity 0.4s ease;
+		pointer-events: none;
+	}
+
+	.device-card:hover::after {
+		opacity: 1;
+	}
+
+	/* 设备名称和规格的文本样式 */
+	.device-card h3 {
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+	}
+
+	/* 响应式调整 */
+	@media (width < 768px) {
+		.filter-container {
+			gap: 0.5rem;
+		}
+
+		.filter-tag {
+			padding: 0.5rem 1rem;
+			font-size: 0.8rem;
+		}
+
+		.device-card .relative.p-6\.pb-0 {
+			padding: 1rem 1rem 0;
+		}
+
+		.device-card .p-6\.pt-4 {
+			padding: 1rem;
+		}
+	}
+
+	/* 在深色模式下微妙的阴影效果 */
+	@media (prefers-color-scheme: dark) {
+		.device-card:hover {
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		}
+	}
+</style>

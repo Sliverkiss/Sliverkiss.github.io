@@ -1,0 +1,162 @@
+.anime-card-base {
+  container-type: inline-size;
+}
+
+.anime-grid-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  transition: gap 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === Grid Mode === */
+.anime-grid-container.anime-grid-mode {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@container (min-width: 30rem) {
+  .anime-grid-container.anime-grid-mode {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@container (min-width: 48rem) {
+  .anime-grid-container.anime-grid-mode {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@container (min-width: 64rem) {
+  .anime-grid-container.anime-grid-mode {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* === List Mode === */
+.anime-grid-container.anime-list-mode {
+  grid-template-columns: repeat(1, 1fr);
+}
+@media (width >= 1280px) {
+  .anime-grid-container.anime-list-mode {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.anime-grid-container.anime-list-mode .group {
+  display: flex;
+  flex-direction: row;
+  min-height: 12rem;
+}
+
+.anime-grid-container.anime-list-mode .anime-cover-container {
+  width: 8.5rem;
+  height: auto;
+  aspect-ratio: 2/3;
+  flex-shrink: 0;
+}
+@media (width >= 768px) {
+  .anime-grid-container.anime-list-mode .anime-cover-container {
+    width: 11rem;
+  }
+}
+
+.anime-grid-container.anime-list-mode .p-3 {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  min-width: 0;
+}
+
+.anime-grid-container.anime-list-mode h3 {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.anime-grid-container.anime-list-mode .p-3 .flex.flex-wrap span {
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.anime-grid-container.anime-list-mode .group p.text-xs {
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+}
+
+.anime-filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.anime-filter-tag {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--line-divider);
+  border-radius: var(--radius-large);
+  background: var(--btn-regular-bg);
+  color: var(--btn-content);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.anime-filter-tag:hover:not(.anime-active) {
+  background: var(--btn-hover-bg);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+.anime-filter-tag.anime-active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.anime-grid-container [data-anime-status].anime-hidden {
+  display: none !important;
+}
+
+.anime-grid-container [data-anime-status] {
+  transition:
+    opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.15s ease-out;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 350px;
+}
+
+.anime-grid-container [data-anime-status].anime-fade-out {
+  opacity: 0;
+  transform: scale(0.9);
+  pointer-events: none;
+}
+
+.anime-grid-container [data-anime-status].anime-fade-in {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.anime-grid-container [data-anime-status].anime-fade-in-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.anime-loading-spinner {
+  border-right-color: var(--primary);
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

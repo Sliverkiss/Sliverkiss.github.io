@@ -1,0 +1,120 @@
+---
+import { FilterTabs } from "@components/atoms/filter-tabs";
+import { AlbumCard } from "@components/features/albums";
+import { PageHeader } from "@components/features/page-header";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { Icon } from "astro-icon/components";
+
+import { siteConfig } from "../config";
+import I18nKey from "../i18n/i18nKey";
+import { i18n } from "../i18n/translation";
+import { scanAlbums } from "../utils/album-scanner";
+
+if (!siteConfig.featurePages.albums) {
+	return Astro.redirect("/404/");
+}
+
+const albumsData = await scanAlbums();
+
+// Collect all unique tags for filtering
+const allTags = [...new Set(albumsData.flatMap((a) => a.tags || []))].sort();
+
+const filterTabs = [
+	{
+		value: "all",
+		label: i18n(I18nKey.albumsFilterAll),
+		icon: "material-symbols:apps",
+		count: albumsData.length,
+	},
+	...allTags.map((tag) => ({
+		value: tag,
+		label: tag,
+		count: albumsData.filter((a) => a.tags?.includes(tag)).length,
+	})),
+];
+
+const title = i18n(I18nKey.albums);
+const subtitle = i18n(I18nKey.albumsSubtitle);
+---
+
+<MainGridLayout title={title} description={subtitle}>
+	<script>
+		import("../scripts/right-sidebar-layout.js");
+		import { loadIconify } from "../utils/icon-loader";
+
+		loadIconify().catch((error) => {
+			console.error("Failed to load Iconify:", error);
+		});
+	</script>
+
+	<script is:inline src="/js/filter-tabs-handler.js"></script>
+
+	<div
+		class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32"
+	>
+		<div class="card-base z-10 px-6 sm:px-9 py-6 relative w-full">
+			<PageHeader title={title} subtitle={subtitle} />
+
+			{
+				albumsData.length > 0 && allTags.length > 0 && (
+					<div class="mb-8">
+						<FilterTabs tabs={filterTabs} dataAttr="tags" />
+					</div>
+				)
+			}
+
+			<div id="albums-grid" class="grid gap-6 items-start">
+				{albumsData.map((album) => <AlbumCard album={album} />)}
+			</div>
+
+			<div id="no-results" class="hidden text-center py-16">
+				<Icon
+					name="material-symbols:search-off-rounded"
+					class="text-6xl text-black/15 dark:text-white/15 mb-4"
+				/>
+				<p class="text-black/40 dark:text-white/40 text-lg">
+					{i18n(I18nKey.albumsNoResults)}
+				</p>
+			</div>
+
+			{
+				albumsData.length === 0 && (
+					<div class="text-center py-16">
+						<Icon
+							name="material-symbols:photo-library"
+							class="text-6xl text-black/15 dark:text-white/15 mb-4"
+						/>
+						<h3 class="text-lg font-medium text-black/90 dark:text-white/90 mb-2">
+							{i18n(I18nKey.albumsEmpty)}
+						</h3>
+						<p class="text-black/60 dark:text-white/60">
+							{i18n(I18nKey.albumsEmptyDesc)}
+						</p>
+					</div>
+				)
+			}
+		</div>
+	</div>
+</MainGridLayout>
+
+<style is:global>
+	#albums-grid {
+		grid-template-columns: 1fr;
+	}
+
+	@media (width >= 640px) {
+		#albums-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	#main-grid[data-layout-mode="grid"] #albums-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	@media (width < 640px) {
+		#main-grid[data-layout-mode="grid"] #albums-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

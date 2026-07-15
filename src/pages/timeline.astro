@@ -1,0 +1,122 @@
+---
+import { FilterTabs } from "@components/atoms/filter-tabs";
+import { PageHeader } from "@components/features/page-header";
+import { TimelineCard } from "@components/features/timeline";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { Icon } from "astro-icon/components";
+
+import { siteConfig } from "../config";
+import { timelineData } from "../data/timeline";
+import I18nKey from "../i18n/i18nKey";
+import { i18n } from "../i18n/translation";
+
+if (!siteConfig.featurePages.timeline) {
+	return Astro.redirect("/404/");
+}
+
+const types = ["education", "work", "project", "achievement"] as const;
+
+const getTypeIcon = (type: string) => {
+	switch (type) {
+		case "education":
+			return "material-symbols:school";
+		case "work":
+			return "material-symbols:work";
+		case "project":
+			return "material-symbols:code";
+		case "achievement":
+			return "material-symbols:emoji-events";
+		default:
+			return "material-symbols:apps";
+	}
+};
+
+const getTypeText = (type: string) => {
+	switch (type) {
+		case "education":
+			return i18n(I18nKey.timelineEducation);
+		case "work":
+			return i18n(I18nKey.timelineWork);
+		case "project":
+			return i18n(I18nKey.timelineProject);
+		case "achievement":
+			return i18n(I18nKey.timelineAchievement);
+		default:
+			return type;
+	}
+};
+
+const filterTabs = [
+	{
+		value: "all",
+		label: i18n(I18nKey.friendsFilterAll),
+		icon: "material-symbols:apps",
+		count: timelineData.length,
+	},
+	...types.map((type) => ({
+		value: type,
+		label: getTypeText(type),
+		icon: getTypeIcon(type),
+		count: timelineData.filter((item) => item.type === type).length,
+	})),
+];
+
+const title = i18n(I18nKey.timeline);
+const subtitle = i18n(I18nKey.timelineSubtitle);
+---
+
+<MainGridLayout title={title} description={subtitle}>
+	<script>
+		import("../scripts/right-sidebar-layout.js");
+		import { loadIconify } from "../utils/icon-loader";
+
+		loadIconify().catch((error) => {
+			console.error("Failed to load Iconify:", error);
+		});
+	</script>
+
+	<script is:inline src="/js/filter-tabs-handler.js"></script>
+
+	<div
+		class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32"
+	>
+		<div class="card-base z-10 px-6 sm:px-9 py-6 relative w-full">
+			<PageHeader title={title} subtitle={subtitle} />
+
+			<div class="mb-8">
+				<FilterTabs tabs={filterTabs} dataAttr="type" />
+			</div>
+
+			<div id="timeline-list" class="timeline-list">
+				{timelineData.map((item) => <TimelineCard item={item} />)}
+			</div>
+
+			<div id="no-results" class="hidden text-center py-16">
+				<Icon
+					name="material-symbols:search-off-rounded"
+					class="text-6xl text-black/15 dark:text-white/15 mb-4"
+				/>
+				<p class="text-black/40 dark:text-white/40 text-lg">
+					No matching items
+				</p>
+			</div>
+		</div>
+	</div>
+</MainGridLayout>
+
+<style>
+	.timeline-list {
+		position: relative;
+	}
+
+	.timeline-list::before {
+		content: "";
+		position: absolute;
+		left: 9px;
+		top: 0;
+		bottom: 0;
+		width: 2px;
+		background: var(--line-divider);
+		border-radius: 1px;
+	}
+</style>

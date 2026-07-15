@@ -1,0 +1,323 @@
+---
+import { Font } from "astro:assets";
+import { PageProgressBar } from "@components/control/PageProgressBar";
+import Pio from "@components/features/pio/Pio.astro";
+import ConfigCarrier from "@components/misc/ConfigCarrier.astro";
+import MusicPlayer from "@components/widgets/music-player/MusicPlayer.svelte";
+import { pioConfig, profileConfig, siteConfig } from "@/config";
+
+const BANNER_HEIGHT = 35;
+const BANNER_HEIGHT_EXTEND = 30;
+const BANNER_HEIGHT_HOME = BANNER_HEIGHT + BANNER_HEIGHT_EXTEND;
+
+import { PAGE_WIDTH } from "../constants/constants";
+import "../styles/main.css";
+import "../styles/mobile-navbar.css";
+import "../styles/wallpaper-navbar-transparent.css";
+import "../styles/fancybox-custom.css";
+import "../styles/expressive-code.css";
+import "../styles/panel-animations.css";
+
+// 导入新提取的 Head 组件
+import AnalyticsScripts from "./partials/AnalyticsScripts.astro";
+import HeadTags from "./partials/HeadTags.astro";
+
+interface Props {
+	title?: string;
+	banner?: string;
+	description?: string;
+	lang?: string;
+	setOGTypeArticle?: boolean;
+	postSlug?: string;
+	coverImage?: string;
+}
+
+let {
+	title,
+	banner,
+	description,
+	lang,
+	setOGTypeArticle,
+	postSlug,
+	coverImage,
+} = Astro.props;
+
+// defines global css variables
+// why doing this in Layout instead of GlobalStyles: https://github.com/withastro/astro/issues/6728#issuecomment-1502203757
+const configHue = siteConfig.themeColor.hue;
+
+// 获取导航栏透明模式配置
+const navbarTransparentMode =
+	siteConfig.banner?.navbar?.transparentMode || "semi";
+
+// 判断是否应该显示顶部高光效果（只在full和semifull模式下显示）
+const shouldShowTopHighlight =
+	navbarTransparentMode === "full" || navbarTransparentMode === "semifull";
+
+// 获取默认banner图片的辅助函数
+const getDefaultBanner = (): string => {
+	const src = siteConfig.banner.src;
+	if (typeof src === "string") {
+		return src;
+	}
+	if (Array.isArray(src)) {
+		return src[0] || "";
+	}
+	if (src && typeof src === "object") {
+		// 优先使用desktop，如果没有则使用mobile
+		const desktopSrc = src.desktop;
+		const mobileSrc = src.mobile;
+		if (typeof desktopSrc === "string") {
+			return desktopSrc;
+		}
+		if (Array.isArray(desktopSrc) && desktopSrc.length > 0) {
+			return desktopSrc[0];
+		}
+		if (typeof mobileSrc === "string") {
+			return mobileSrc;
+		}
+		if (Array.isArray(mobileSrc) && mobileSrc.length > 0) {
+			return mobileSrc[0];
+		}
+	}
+	return "";
+};
+
+if (!banner || typeof banner !== "string" || banner.trim() === "") {
+	banner = getDefaultBanner();
+}
+
+// TODO don't use post cover as banner for now
+banner = getDefaultBanner();
+
+const enableBanner = !!siteConfig.banner.src;
+
+let pageTitle: string;
+if (title) {
+	pageTitle = `${title} - ${siteConfig.title}`;
+} else {
+	pageTitle = siteConfig.subtitle
+		? `${siteConfig.title} - ${siteConfig.subtitle}`
+		: siteConfig.title;
+}
+
+let ogImageUrl: string | undefined;
+if (siteConfig.generateOgImages && postSlug) {
+	ogImageUrl = new URL(`/og/${postSlug}.png`, Astro.site).toString();
+} else if (coverImage) {
+	// For post pages with cover images, use the resolved cover image
+	ogImageUrl = coverImage.startsWith("http")
+		? coverImage
+		: new URL(coverImage, Astro.site).toString();
+} else if (banner) {
+	// For others, use the first banner as OG image
+	ogImageUrl = banner.startsWith("http")
+		? banner
+		: new URL(banner, Astro.site).toString();
+}
+
+// const siteLang = siteConfig.lang.replace('_', '-')
+if (!lang) {
+	lang = `${siteConfig.lang}`;
+}
+const siteLang = lang.replace("_", "-");
+
+const bannerOffsetByPosition = {
+	top: `${BANNER_HEIGHT_EXTEND}vh`,
+	center: `${BANNER_HEIGHT_EXTEND / 2}vh`,
+	bottom: "0",
+};
+const bannerOffset =
+	bannerOffsetByPosition[siteConfig.banner.position || "center"];
+
+// CSS 变量由 Astro Font API 自动注入，body 字体通过 Tailwind --font-body 应用
+---
+
+<!doctype html>
+<html
+	lang={siteLang}
+	class="bg-(--page-bg) text-[14px] md:text-[16px]"
+	data-overlayscrollbars-initialize
+	data-waves-config-enabled={siteConfig.banner?.waves?.enable ? "true" : "false"}
+	data-banner-title-config-enabled={siteConfig.banner?.homeText?.enable ? "true" : "false"}
+	data-post-list-layout-enabled={siteConfig.postListLayout?.enable ? "true" : "false"}
+>
+	<head>
+		<meta charset="UTF-8" />
+		<Font cssVariable="--font-body" preload />
+		<Font cssVariable="--font-cjk" />
+		<Font cssVariable="--font-jetbrains-mono" />
+
+		<script is:inline>
+			(function() {
+				try {
+					var html = document.documentElement;
+					var cw = html.getAttribute("data-waves-config-enabled");
+					if (cw === "false") {
+						html.setAttribute("data-waves-enabled", "false");
+					} else {
+						var w = localStorage.getItem("wavesEnabled");
+						if (w !== null) html.setAttribute("data-waves-enabled", w);
+					}
+					var ct = html.getAttribute("data-banner-title-config-enabled");
+					if (ct === "false") {
+						html.setAttribute("data-banner-title-enabled", "false");
+					} else {
+						var t = localStorage.getItem("bannerTitleEnabled");
+						if (t !== null) html.setAttribute("data-banner-title-enabled", t);
+					}
+				} catch(e) {}
+			})();
+		</script>
+
+		<!-- 第三方分析脚本 -->
+		<AnalyticsScripts
+			thirdPartyAnalytics={siteConfig.thirdPartyAnalytics}
+		/>
+
+		<!-- SEO Meta Tags, Open Graph, Twitter Card, Favicons, Theme Init -->
+		<HeadTags
+			title={pageTitle}
+			description={description}
+			ogImageUrl={ogImageUrl}
+			setOGTypeArticle={setOGTypeArticle}
+			configHue={configHue}
+		/>
+
+		<!-- defines global css variables. This will be applied to <html> <body> and some other elements idk why -->
+		<slot name="head" />
+
+		<!-- Global CSS variables for page width and hue -->
+		<style
+			define:vars={{
+				configHue,
+				"page-width": `${PAGE_WIDTH}rem`,
+			}}
+		></style>
+
+		<link
+			rel="alternate"
+			type="application/rss+xml"
+			title={profileConfig.name}
+			href={`${Astro.site}rss.xml`}
+		/>
+	</head>
+	<body
+		class="min-h-screen"
+		class:list={[
+			{ "enable-banner": enableBanner, "enable-card-border": siteConfig.card?.border },
+		]}
+
+		data-overlayscrollbars-initialize
+	>
+		<noscript
+			><iframe
+				src="https://www.googletagmanager.com/ns.html?id=GTM-KRX3XGVH"
+				height="0"
+				width="0"
+				style="display:none;visibility:hidden"></iframe></noscript
+		>
+		<!-- 页面顶部渐变高光效果 - 只在full和semifull模式下显示 -->
+		{shouldShowTopHighlight && <div class="top-gradient-highlight" />}
+
+		<ConfigCarrier />
+		<PageProgressBar
+			enable={siteConfig.pageProgressBar?.enable ?? false}
+			height={siteConfig.pageProgressBar?.height ?? 3}
+			duration={siteConfig.pageProgressBar?.duration ?? 8000}
+		/>
+		<slot />
+
+		<!-- Music Player - 核心始终加载（当enable=true），UI通过showFloatingPlayer控制 -->
+		<MusicPlayer client:idle />
+
+		<!-- Pio 看板娘组件 - 仅在进入视口时加载 -->
+		{pioConfig.enable && <Pio config={pioConfig} />}
+
+		<!-- increase the page height during page transition to prevent the scrolling animation from jumping -->
+		<div id="page-height-extend" class="hidden h-[300vh]"></div>
+	</body>
+</html>
+
+<style
+	is:global
+	define:vars={{
+		bannerOffset,
+		"banner-height-home": `${BANNER_HEIGHT_HOME}vh`,
+		"banner-height": `${BANNER_HEIGHT}vh`,
+	}}
+>
+	@reference "../styles/main.css";
+
+	@layer components {
+		@media (width >= 1280px) {
+			.enable-banner #banner-wrapper {
+				height: var(--banner-height-home);
+				transform: translateY(var(--banner-height-extend));
+			}
+
+			.enable-banner #banner {
+				height: var(--banner-height-home);
+				transform: translateY(0);
+			}
+			.enable-banner #main-grid {
+				transform: translateY(var(--banner-height-extend));
+			}
+			.enable-banner #top-row {
+				height: calc(var(--banner-height-home) - 4.5rem);
+				@apply transition-all duration-300;
+			}
+		}
+
+		/* Water waves animation - GPU 加速优化 */
+		.waves > .parallax use {
+			animation: wave 25s cubic-bezier(0.5, 0.5, 0.45, 0.5) infinite;
+			transform: translateZ(0);
+			will-change: transform;
+			backface-visibility: hidden;
+		}
+		@keyframes wave {
+			0% {
+				transform: translate3d(-90px, 0, 0);
+			}
+			100% {
+				transform: translate3d(85px, 0, 0);
+			}
+		}
+	}
+	@layer utilities {
+		@media (width >= 1280px) {
+			.enable-banner #sidebar-sticky {
+				top: calc(1rem - var(--banner-height-extend)) !important;
+			}
+			.enable-banner #left-sidebar-sticky {
+				top: calc(1rem - var(--banner-height-extend)) !important;
+			}
+			.enable-banner #right-sidebar-sticky {
+				top: calc(1rem - var(--banner-height-extend)) !important;
+			}
+		}
+		.navbar-hidden {
+			@apply opacity-0 -translate-y-16;
+		}
+	}
+</style>
+
+<script>
+	// Swup 页面过渡管理器 - 统一入口
+	// 所有功能已重构为模块化架构，详见 src/scripts/ 目录
+	import { initSwupManager } from "../scripts/swup-manager";
+
+	// 初始化 Swup 管理器
+	initSwupManager();
+</script>
+
+<!-- 代码块折叠功能 -->
+<script>
+	import "../scripts/code-collapse.js";
+</script>
+
+<!-- 主题切换综合性能优化器（包含代码块优化、重型元素优化、性能诊断） -->
+<script>
+	import "../scripts/theme-optimizer.js";
+</script>

@@ -1,0 +1,17 @@
+---
+import FloatingButton from "@components/common/FloatingButton.astro";
+---
+
+<FloatingButton
+	id="back-to-top-btn"
+	icon="material-symbols:keyboard-arrow-up-rounded"
+	ariaLabel="Back to Top"
+	onclick="backToTop()"
+	class="hide"
+/>
+
+<script is:raw is:inline>
+	function backToTop() {
+		window.scroll({ top: 0, behavior: "smooth" });
+	}
+</script>

@@ -1,0 +1,131 @@
+---
+import { FilterTabs } from "@components/atoms/filter-tabs";
+import { PageHeader } from "@components/features/page-header";
+import { SkillCard } from "@components/features/skills";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { Icon } from "astro-icon/components";
+
+import { siteConfig } from "../config";
+import { skillsData } from "../data/skills";
+import I18nKey from "../i18n/i18nKey";
+import { i18n } from "../i18n/translation";
+
+if (!siteConfig.featurePages.skills) {
+	return Astro.redirect("/404/");
+}
+
+const categories = [...new Set(skillsData.map((skill) => skill.category))];
+
+const getCategoryText = (category: string) => {
+	switch (category) {
+		case "frontend":
+			return i18n(I18nKey.skillsFrontend);
+		case "backend":
+			return i18n(I18nKey.skillsBackend);
+		case "database":
+			return i18n(I18nKey.skillsDatabase);
+		case "tools":
+			return i18n(I18nKey.skillsTools);
+		case "other":
+			return i18n(I18nKey.skillsOther);
+		default:
+			return category;
+	}
+};
+
+const getCategoryIcon = (category: string) => {
+	switch (category) {
+		case "frontend":
+			return "material-symbols:web";
+		case "backend":
+			return "material-symbols:dns";
+		case "database":
+			return "material-symbols:storage";
+		case "tools":
+			return "material-symbols:build";
+		case "other":
+			return "material-symbols:widgets";
+		default:
+			return "material-symbols:category";
+	}
+};
+
+const filterTabs = [
+	{
+		value: "all",
+		label: i18n(I18nKey.friendsFilterAll),
+		icon: "material-symbols:apps",
+		count: skillsData.length,
+	},
+	...categories.map((category) => ({
+		value: category,
+		label: getCategoryText(category),
+		icon: getCategoryIcon(category),
+		count: skillsData.filter((s) => s.category === category).length,
+	})),
+];
+
+const title = i18n(I18nKey.skills);
+const subtitle = i18n(I18nKey.skillsSubtitle);
+---
+
+<MainGridLayout title={title} description={subtitle}>
+	<script>
+		import("../scripts/right-sidebar-layout.js");
+		import { loadIconify } from "../utils/icon-loader";
+
+		loadIconify().catch((error) => {
+			console.error("Failed to load Iconify:", error);
+		});
+	</script>
+
+	<script is:inline src="/js/filter-tabs-handler.js"></script>
+
+	<div
+		class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32"
+	>
+		<div class="card-base z-10 px-6 sm:px-9 py-6 relative w-full">
+			<PageHeader title={title} subtitle={subtitle} />
+
+			<div class="mb-8">
+				<FilterTabs tabs={filterTabs} dataAttr="category" />
+			</div>
+
+			<div id="skills-grid" class="grid gap-6 items-start">
+				{skillsData.map((skill) => <SkillCard skill={skill} />)}
+			</div>
+
+			<div id="no-results" class="hidden text-center py-16">
+				<Icon
+					name="material-symbols:search-off-rounded"
+					class="text-6xl text-black/15 dark:text-white/15 mb-4"
+				/>
+				<p class="text-black/40 dark:text-white/40 text-lg">
+					No matching skills
+				</p>
+			</div>
+		</div>
+	</div>
+</MainGridLayout>
+
+<style is:global>
+	#skills-grid {
+		grid-template-columns: 1fr;
+	}
+
+	@media (width >= 640px) {
+		#skills-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	#main-grid[data-layout-mode="grid"] #skills-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	@media (width < 640px) {
+		#main-grid[data-layout-mode="grid"] #skills-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

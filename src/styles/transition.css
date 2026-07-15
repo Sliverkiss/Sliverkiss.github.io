@@ -1,0 +1,229 @@
+@import "./_transition-vars.css";
+
+/* 主要内容区域的过渡动画 - 纯垂直效果 */
+.transition-main {
+  transition:
+    opacity var(--transition-duration) var(--transition-easing),
+    transform var(--transition-duration) var(--transition-easing);
+}
+
+/* 离开动画 */
+.transition-leaving {
+  transition:
+    transform var(--transition-duration) var(--transition-easing-out),
+    opacity var(--transition-duration) var(--transition-easing-out);
+}
+
+html.is-changing .transition-main {
+  transition:
+    opacity var(--transition-duration) var(--transition-easing),
+    transform var(--transition-duration) var(--transition-easing);
+}
+
+html.is-leaving .transition-main {
+  transition:
+    opacity var(--transition-duration) var(--transition-easing-out),
+    transform var(--transition-duration) var(--transition-easing-out);
+}
+
+/* 进入动画 - 纯垂直 */
+html.is-animating .transition-main {
+  opacity: 0;
+  transform: translateY(var(--transition-translate));
+}
+
+/* 离开动画 - 向上滑出 */
+html.is-animating.is-leaving .transition-leaving {
+  transform: translateY(calc(var(--transition-translate) * -1));
+  opacity: 0;
+}
+
+/* Swup fade 动画 */
+html.is-changing .transition-swup-fade {
+  transition: all var(--transition-duration) ease-out;
+}
+
+html.is-animating .transition-swup-fade {
+  opacity: 0;
+  transform: translateY(var(--transition-translate));
+}
+
+/* 淡入动画 */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(var(--transition-translate));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-out-down {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(calc(var(--transition-translate) * -1));
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 页面加载动画 */
+.onload-animation {
+  opacity: 0;
+  animation: fade-in-up var(--transition-duration) ease-out forwards;
+}
+
+.onload-animation-fade-in {
+  opacity: 0;
+  animation: fade-in var(--transition-duration) ease-in forwards;
+}
+
+/* 渐进式动画延迟 */
+.onload-animation:nth-child(1) {
+  animation-delay: calc(var(--transition-stagger) * 0);
+}
+.onload-animation:nth-child(2) {
+  animation-delay: calc(var(--transition-stagger) * 1);
+}
+.onload-animation:nth-child(3) {
+  animation-delay: calc(var(--transition-stagger) * 2);
+}
+.onload-animation:nth-child(4) {
+  animation-delay: calc(var(--transition-stagger) * 3);
+}
+.onload-animation:nth-child(5) {
+  animation-delay: calc(var(--transition-stagger) * 4);
+}
+
+/* 特殊元素的动画 */
+.transition-slide-in {
+  opacity: 0;
+  transform: translateY(calc(var(--transition-translate) * 1.2));
+  transition: all calc(var(--transition-duration) * 1.5) var(--transition-easing);
+}
+
+.transition-slide-in.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 卡片动画 */
+.card-animation {
+  opacity: 0;
+  transform: translateY(calc(var(--transition-translate) * 1.5)) scale(0.98);
+  transition: all calc(var(--transition-duration) * 1.2) var(--transition-easing);
+}
+
+.card-animation.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* 导航动画 */
+.nav-animation {
+  opacity: 0;
+  transform: translateX(calc(var(--transition-translate) * -1));
+  transition: all calc(var(--transition-duration) * 0.8) var(--transition-easing);
+}
+
+.nav-animation.loaded {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 性能优化 */
+.transition-main,
+.transition-leaving,
+.onload-animation,
+.transition-slide-in,
+.card-animation {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* GPU 加速优化 - 用于 wave 等重型动画 */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  isolation: isolate;
+}
+
+/* View Transitions API - 主题切换动画 */
+::view-transition-old(root) {
+  animation: theme-fade-out 0.25s ease-out forwards;
+  z-index: 2;
+}
+
+::view-transition-new(root) {
+  animation: theme-fade-in 0.25s ease-in forwards;
+  z-index: 1;
+}
+
+@keyframes theme-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes theme-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 主题切换期间禁用复杂动画 */
+.is-theme-transitioning .waves > .parallax use,
+.is-theme-transitioning .sakura-canvas,
+.is-theme-transitioning .animation-element {
+  animation-play-state: paused !important;
+}
+
+/* 移动端性能优化 */
+@media (width < 768px) {
+  .transition-main,
+  .transition-leaving,
+  .onload-animation,
+  .transition-slide-in,
+  .card-animation {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
+
+/* 减少动画的用户偏好设置 */
+@media (prefers-reduced-motion: reduce) {
+  .transition-main,
+  .transition-leaving,
+  .onload-animation,
+  .transition-slide-in,
+  .card-animation,
+  .nav-animation,
+  .waves > .parallax use,
+  .sakura-canvas,
+  .animation-element {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    will-change: auto !important;
+  }
+}

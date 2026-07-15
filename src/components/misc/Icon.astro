@@ -1,0 +1,35 @@
+---
+/**
+ * Icon 组件 - 向后兼容包装器
+ *
+ * 此文件包装 atoms/Icon/ 以保持向后兼容性
+ * 新代码应直接从 @components/atoms/Icon 导入
+ *
+ * @deprecated 请使用 import from "@components/atoms/Icon"
+ */
+
+import BaseIcon from "../atoms/Icon/Icon.astro";
+import type { IconProps } from "../atoms/Icon/types";
+
+export interface Props extends IconProps {}
+
+const {
+	icon,
+	class: className = "",
+	style = "",
+	size = "md",
+	color,
+	fallback = "●",
+	loading = "lazy",
+} = Astro.props;
+---
+
+<BaseIcon
+	icon={icon}
+	class={className}
+	style={style}
+	size={size}
+	color={color}
+	fallback={fallback}
+	loading={loading}
+/>
