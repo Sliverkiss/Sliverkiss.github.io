@@ -159,6 +159,10 @@ social:
     url: /rss.xml # 站内 RSS 订阅地址
     icon: ri:rss-line
     color: '#ff6600'
+  telegram:
+    url: https://t.me/sliverkiss
+    icon: ri:telegram-fill
+    color: '#229ED9'
   # -------------------------------------------------------------------------
   # 以下是更多可选的社交平台配置示例，取消注释并修改即可启用：
   # -------------------------------------------------------------------------
@@ -202,14 +206,14 @@ friends:
     title: 友情链接 # 页面标题
     subtitle: 欢迎交换友链！ # 页面副标题
     applyTitle: 申请友链 # 申请区块标题
-    applyDesc: 请在本页留言，格式如下 # 申请说明
+    applyDesc: 请通过 GitHub / Telegram / Email 联系我 # 申请说明
     exampleYaml: | # 申请格式示例，会显示在页面上
-      - site: 你的博客名称 # 站点名称
-        url: https://your-blog.com/ # 站点网址
-        owner: 你的昵称 # 昵称
-        desc: 站点简介 # 站点简介
-        image: https://your-blog.com/avatar.jpg # 头像链接
-        color: "#ffc0cb" # 主题色（可选）
+      - site: 你的博客名称
+        url: https://your-blog.com/
+        owner: 你的昵称
+        desc: 站点简介
+        image: https://your-blog.com/avatar.jpg
+        color: "#ffc0cb"
   data: # 友链列表
     - site: Sliverkiss Blog
       url: https://blog.xn--ug8h.eu.org
@@ -217,12 +221,6 @@ friends:
       desc: 与你一起发现更大的世界
       image: /img/avatar.webp
       color: '#ed788b'
-    - site: Koharu
-      url: https://koharu.cosine.ren
-      owner: cos
-      desc: 粉蓝 ACG Astro 博客主题
-      image: https://blog.cosine.ren/img/avatar.webp
-      color: '#BEDCFF'
 
 # =============================================================================
 # Announcements
@@ -377,10 +375,6 @@ navigation:
     nameKey: nav.about
     path: /about
     icon: fa6-regular:circle-user
-  - name: 歌单
-    nameKey: nav.music
-    path: /music
-    icon: ri:music-2-fill
 
 # =============================================================================
 # Christmas/Seasonal Features
@@ -537,9 +531,9 @@ comment:
 # -----------------------------------------------------------------------------
 analytics:
   umami:
-    enabled: true
-    id: your-umami-id
-    endpoint: https://stats.example.com
+    enabled: false
+    id: ""
+    endpoint: ""
     # statistics_display:
     #   token: your-umami-share-token
     #   article_page_views: true
@@ -569,15 +563,8 @@ seo:
 # Christmas/Seasonal Features
 # =============================================================================
 bgm:
-  enabled: true  # (有 audio 时自动启用，显式 false 可禁用)
-  # metingApi: https://163.hyc.moe/  # Meting API 地址，默认为 https://163.hyc.moe/，推荐自部署
-  audio:
-    - title: 最爱山山
-      list:
-        - https://music.163.com/playlist?id=8676645748
-    - title: Love Vocaloid
-      list:
-        - https://music.163.com/playlist?id=8882890045
+  enabled: false
+  audio: []
 
 christmas:
   enabled: false # 总开关
@@ -605,38 +592,5 @@ christmas:
 #   label: 导航显示名称（可选，默认：追番）
 #   icon: 导航图标，Iconify 格式（可选，默认：ri:bilibili-fill）
 # -----------------------------------------------------------------------------
-bangumi:
-  userId: cosine
-  # label: 追番
-  # icon: ri:bilibili-fill
-
-# =============================================================================
-# Development Tools (Dev Only)
-# 开发工具配置 - 仅在开发环境（pnpm dev）生效
-# =============================================================================
-# 配置后，开发环境下文章页会显示编辑按钮，可快速打开本地编辑器
-# 字段说明：
-#   localProjectPath: 本地项目的绝对路径（用于生成文件完整路径）
-#   contentRelativePath: 博客内容相对于项目根目录的路径（默认: 'src/content/blog'）
-#   editors: 编辑器列表
-#     - id: 编辑器唯一标识符
-#     - name: 编辑器显示名称
-#     - icon: Iconify 图标标识（可从 https://icon-sets.iconify.design/ 中搜寻）
-#     - urlTemplate: URL 模板，支持占位符 {path}（文件绝对路径）
-# -----------------------------------------------------------------------------
-dev:
-  localProjectPath: '/Users/yourname/path/to/astro-koharu' # 请修改为你的项目绝对路径
-  contentRelativePath: 'src/content/blog'
-  editors:
-    - id: vscode
-      name: VS Code
-      icon: devicon-plain:vscode
-      urlTemplate: 'vscode://file/{path}'
-    - id: cursor
-      name: Cursor
-      icon: simple-icons:cursor
-      urlTemplate: 'cursor://file/{path}'
-    - id: zed
-      name: Zed
-      icon: simple-icons:zedindustries
-      urlTemplate: 'zed://file/{path}'
+# bangumi:  # 未配置个人 Bangumi，关闭追番页
+#   userId: your-bangumi-id
