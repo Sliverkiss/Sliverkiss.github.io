@@ -2,54 +2,74 @@
 layout: ../layouts/PageLayout.astro
 title: "About"
 coverTitle: "关于我"
-date: 2023-05-17 00:00:00
-description: "如果你知道了我是谁，请不要说出来，因为我想尽力避免麻烦。"
+date: 2026-07-15 12:00:00
+description: "一个乐观的虚无主义者。"
 ---
 
-> 一些关于我的小秘密～
+> 如果你知道了我是谁，请不要说出来——麻烦这种东西，能少则少。
 
 ## 说说
 
 诸位，安好～
 
-我是 **Sliverkiss**，一名爱好编程的极简主义者，存在于地球表层的亚热带地域群居性生物。喜欢呆在家里无所事事，悠闲自在的消磨时光。目前正在为用什么恰饭而苦恼。
+我是 **Sliverkiss**。GitHub 简介里写的是「一个乐观的虚无主义者」，大概也差不太多：认真折腾，不认真较真。
 
-### 爱好
+喜欢把工具做「能用」而不是「看起来很能用」。自用脚本、代理规则、Bot、API 中转……能省掉自己重复劳动的东西，就值得写。
 
-- 阅读。每天阅读一小时，确保一周一本书的阅读量。
-- 运动。只喜欢慢跑，确保达到每天基本的运动量，不追求塑造形体。
-- 上网冲浪，喜欢根据关键词随机刮削技术性文章，折腾不懂的东西。偶尔写一些自己用的~~签到~~小脚本。
-- 目前正在学习写作与 js 逆向编程。
+有些仓库会写「不要 fork，谢谢」——不是傲娇，是那玩意儿真的只适合我自己的环境。觉得有用的话，点个 star 就够了。
 
-### 设备
+## 最近在折腾
 
-这是我目前在用的数码设备：
+- **JS 逆向**：拆协议、对接口、写自动化，属于正经爱好。
+- **MCP / AI 工具链**：把各种模型和平台接到自己的工作流里。
+- **Serverless / Cloudflare Workers**：没公网、不想养机，就往边缘扔。
+- **Telegram Bot**：Node 和 Deno 都写过，插件多到自己都未必记得清。
 
-- 联想小新 Pro 13 2021
-- iPad Pro 2021
-- 小米 AC2100
-- MINISFORUM GK41
-- iPhone XR
-- 小米多亲 Qin2
-- Kindle Paperwhite 5
-- 山灵 M0
+## 比较有人气的东西
 
-### 寻找我
+- [QuantumultX 脚本合集](https://github.com/Sliverkiss/QuantumultX)（⭐700+）——iOS 自动化那一摊
+- [GoodNight](https://github.com/Sliverkiss/GoodNight)——自用向自动化
+- [CodeBuddy2api](https://github.com/Sliverkiss/CodeBuddy2api)——把官方 API 包成 OpenAI 兼容接口
+- [Bot-Anic](https://github.com/Sliverkiss/Bot-Anic)——Deno 上的多插件 Telegram Bot
 
-想联系我？建议使用 Telegram 联系我，如有商业合作提前备注添加好友。
+其余仓库多半是自用工具、实验品和「写完自己爽一下」的项目。
 
-- RSS：[RSS 订阅](/rss.xml)
-- GitHub：[@sliverkiss](https://github.com/sliverkiss)
+## 技术栈（不装）
+
+常用：**JavaScript / TypeScript / Python**，运行时 Node、Deno，部署偏 **Cloudflare / Docker**。  
+业务上更熟的是：逆向、自动化脚本、Bot、API 兼容层。
+
+GitHub 上大约 70 个公开仓库、500+ followers——数字会变，兴趣比数字稳。
+
+## 设备
+
+（会随手换，仅供参考）
+
+- 笔记本 / 小主机 / 家里那点网络设备
+- 手机 + 平板（脚本和测试用）
+- Kindle（还在读）
+
+具体型号不重要，能开机、能 ssh 就行。
+
+## 寻找我
+
+- GitHub：[@sliverkiss](https://github.com/Sliverkiss)
 - Telegram：[@sliverkiss](https://t.me/sliverkiss)
 - Email：tistzach@gmail.com
+- 本站 RSS：[/rss.xml](/rss.xml)
 
-### 平台
+商业合作请提前备注，别上来就塞广告。
 
-放弃社交，目前只在 Telegram、GitHub 以及各大图书馆出没。
+## 平台
 
-### 本站
+社交基本放弃。  
+日常出没：Telegram、GitHub、以及——互联网上各种需要被拆开看看的接口。
 
-本站基于 [Astro](https://astro.build) 与 [astro-koharu](https://github.com/cosZone/astro-koharu) 主题构建，托管于 GitHub Pages。
+## 本站
 
-- 站点：https://blog.xn--ug8h.eu.org
-- 备用：https://sliverkiss.github.io
+博客从 Jekyll 换到了 [astro-koharu](https://github.com/cosZone/astro-koharu)，托管在 GitHub Pages。
+
+- 主站：https://blog.xn--ug8h.eu.org  
+- 备用：https://sliverkiss.github.io  
+
+旧文还在，新文随缘。欢迎路过，不欢迎催更。
