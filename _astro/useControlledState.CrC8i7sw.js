@@ -1,0 +1,1 @@
+import{r as e}from"./index.BIRwh3HZ.js";function d({value:s,defaultValue:n,onChange:o}){const t=s!==void 0,u=e.useRef(t);e.useEffect(()=>{u.current=t},[t]);const[a,l]=e.useState(n),c=t?s:a,f=e.useCallback(r=>{t||l(r),o?.(r)},[t,o]);return[c,f]}export{d as u};

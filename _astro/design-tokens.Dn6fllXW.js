@@ -1,0 +1,1 @@
+const n={duration:{fast:150},spring:{default:{type:"spring",stiffness:300,damping:30},gentle:{type:"spring",stiffness:200,damping:25},menu:{type:"spring",stiffness:300,damping:25},popoverContent:{type:"spring",stiffness:300,damping:20}}},s={modalBackdrop:1040,modal:1050};export{n as a,s as z};

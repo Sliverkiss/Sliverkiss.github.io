@@ -1,0 +1,1 @@
+import{i as n}from"./announcement.BMvckTqa.js";import"./index.BHh4vvK5.js";import"./index.3whys8t3.js";function t(){n()}document.readyState!=="loading"&&t();document.addEventListener("astro:page-load",t);

@@ -1,6 +1,3 @@
 User-agent: *
-Disallow: /
-Allow: /$
-Allow: /posts/
-
+Allow: /
 Sitemap: https://blog.xn--ug8h.eu.org/sitemap-index.xml
