@@ -1,4 +1,179 @@
-<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet href="/rss/feed.xsl" type="text/xsl"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Sliverkiss Blog</title><description>与你一起发现更大的世界</description><link>https://blog.xn--ug8h.eu.org</link><item><title>给 Hermes 装 RTK：终端输出瘦身，token 少烧一点</title><link>https://blog.xn--ug8h.eu.org/post/note/%E7%BB%99hermes%E8%A3%85rtk</link><guid isPermaLink="false">note/给hermes装rtk</guid><description>预编译要 GLIBC 2.39、本机只有 2.36 时源码编译；rtk init 对接插件；gateway 必须在会话外重启。</description><pubDate>Wed, 15 Jul 2026 15:59:00 GMT</pubDate><content:encoded>&lt;blockquote&gt;
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet href="/rss/feed.xsl" type="text/xsl"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Sliverkiss Blog</title><description>与你一起发现更大的世界</description><link>https://blog.xn--ug8h.eu.org</link><item><title>用 AI Agent 薅 AI 羊毛：一个 Telegram 监控频道的搭建记录</title><link>https://blog.xn--ug8h.eu.org/post/note/tg-ai-monitor</link><guid isPermaLink="false">note/tg-ai-monitor</guid><description>RSSHub 拉公开频道 → LLM 两段过滤 → 多角度改写 → Bot 推送，附带产品页截图兜底。一台 aarch64 上的 cron 折腾。</description><pubDate>Thu, 16 Jul 2026 00:15:00 GMT</pubDate><content:encoded>&lt;blockquote&gt;
+&lt;p&gt;能用 &amp;gt; 看起来能用。与其手动刷频道找免费额度，不如让 Agent 自己刷。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;起因&lt;a href=&quot;#起因&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;关注了几个 TG 羊毛频道，每天消息不少，真正有用的 AI 免费额度 / 新模型上线 / IDE 送积分之类，混在抽奖、开卡、广告里，手动翻很烦。&lt;/p&gt;
+&lt;p&gt;于是想：能不能让 AI 帮我盯着，过滤掉噪音，只推一条干净的摘要到自己的频道？&lt;/p&gt;
+&lt;p&gt;答案是可以，而且不贵——跑在自家 aarch64 小机器上，cron 每 15 分钟一轮，LLM 用免费模型，零额外成本。&lt;/p&gt;
+&lt;h2&gt;架构&lt;a href=&quot;#架构&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;整体链路长这样：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;公开TG频道&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;  → RSSHub 拉消息&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;  → SQLite 去重（source:msgId）&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;  → 关键词硬过滤（标题级）&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;  → LLM 预过滤（频道短文本，不爬论坛）&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;  → 仅对 KEEP 项：Scrapling 抓论坛首楼正文&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;  → LLM 二次过滤（正文级，杀软广/折扣）&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;  → 跨频道去重&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;  → LLM 多角度改写（3 角度 + 1 整合）&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;  → Bot 推送到目标群&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;  → 无图有产品链 → Playwright 截图首屏兜底&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;  → SQLite 标记 pushed&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;一句话：&lt;strong&gt;频道短文本先判要不要看，论坛正文再判要不要推，最后 AI 重写 + 截图，推完入库。&lt;/strong&gt;&lt;/p&gt;
+&lt;h2&gt;各层做了什么&lt;a href=&quot;#各层做了什么&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;h3&gt;消息来源：RSSHub&lt;a href=&quot;#消息来源rsshub&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;公开 TG 频道不需要 Bot API 读权限，RSSHub 提供了 &lt;code&gt;rsshub.rssforever.com/telegram/channel/&amp;lt;name&amp;gt;&lt;/code&gt; 端点，直接拉最近消息为 RSS。&lt;/p&gt;
+&lt;p&gt;每个频道限 10 条/轮，够用。RSSHub 有时不稳，多个实例轮换即可。&lt;/p&gt;
+&lt;h3&gt;去重：SQLite&lt;a href=&quot;#去重sqlite&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;每条消息的 &lt;code&gt;source_channel:msg_id&lt;/code&gt; 作为主键入 &lt;code&gt;channel_posts&lt;/code&gt; 表，状态流转 &lt;code&gt;seen → filtered → pushed&lt;/code&gt;。跨频道去重用 &lt;code&gt;dedupe_keys&lt;/code&gt; 表，避免同一产品被两个频道各推一次。&lt;/p&gt;
+&lt;p&gt;14 天自动清理，&lt;code&gt;RETENTION_DAYS=14&lt;/code&gt;，不用管膨胀。&lt;/p&gt;
+&lt;h3&gt;关键词硬过滤&lt;a href=&quot;#关键词硬过滤&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;在 LLM 之前先跑一层正则：抽奖、开卡、虚拟卡、机场、节点、域名交易——直接丢。省 token，也减少误判。&lt;/p&gt;
+&lt;h3&gt;LLM 预过滤（Stage A）&lt;a href=&quot;#llm-预过滤stage-a&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;只看频道标题 + 短文本（~800 字符），不爬论坛。prompt 让模型判断：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;KEEP&lt;/strong&gt;：免费 API / 模型额度 / IDE 送积分 / 官方 free tier 上线&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DROP&lt;/strong&gt;：抽奖、中转、反代、合租、广告、求助、 rant&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;输出 JSON：&lt;code&gt;useful&lt;/code&gt; / &lt;code&gt;score&lt;/code&gt; / &lt;code&gt;kind&lt;/code&gt; / &lt;code&gt;reason&lt;/code&gt; / &lt;code&gt;summary&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;这一层砍掉 80% 的消息，后面论坛爬取只对 KEEP 项做。&lt;/p&gt;
+&lt;h3&gt;论坛正文抓取&lt;a href=&quot;#论坛正文抓取&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Stage A 说 KEEP 的，才去爬论坛首楼。按站点分族：&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;族&lt;/th&gt;&lt;th&gt;站点&lt;/th&gt;&lt;th&gt;抓法&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;discourse&lt;/td&gt;&lt;td&gt;linux.do, nodeloc&lt;/td&gt;&lt;td&gt;&lt;code&gt;/t/{id}.json&lt;/code&gt; 首帖 &lt;code&gt;cooked&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;nodeseek&lt;/td&gt;&lt;td&gt;nodeseek.com&lt;/td&gt;&lt;td&gt;首个 &lt;code&gt;article.post-content&lt;/code&gt; + &lt;code&gt;/jump?to=&lt;/code&gt; 解包&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;v2ex&lt;/td&gt;&lt;td&gt;v2ex.com&lt;/td&gt;&lt;td&gt;&lt;code&gt;topic_content&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;generic&lt;/td&gt;&lt;td&gt;其它&lt;/td&gt;&lt;td&gt;article/main only&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;p&gt;硬规则：&lt;strong&gt;只认首楼正文链接&lt;/strong&gt;，不扫整页——否则侧栏广告、站点规则页混进来就乱了。&lt;/p&gt;
+&lt;h3&gt;LLM 二次过滤（Stage B）&lt;a href=&quot;#llm-二次过滤stage-b&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;拿到论坛正文后，再跑一次 LLM。这次能看清全文，专门杀：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;软广（折扣、专属价、充值套餐）&lt;/li&gt;
+&lt;li&gt;促销算力（Seedance 9折之类）&lt;/li&gt;
+&lt;li&gt;「怎么发羊毛」教程帖&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;同一个产品两个频道各发一次，dedupe_key 去重。&lt;/p&gt;
+&lt;h3&gt;多角度改写推送&lt;a href=&quot;#多角度改写推送&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;确定要推了，不直接发原文。跑 3 个角度分析师 + 1 个整合器：&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;角度&lt;/th&gt;&lt;th&gt;提取什么&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;hook&lt;/td&gt;&lt;td&gt;白嫖价值 / 额度 / 模型 / 可否重复注册&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;howto&lt;/td&gt;&lt;td&gt;怎么领 / 门槛 / 有效期&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;caveat&lt;/td&gt;&lt;td&gt;坑 / 绑卡 / 限地区 / 不稳定&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;p&gt;三个角度各出一组 bullet，整合成一条口语化短文。正文尽量 ≤80 字，点关键信息：额度、模型、无限注册、有效期。&lt;/p&gt;
+&lt;p&gt;有效期不写 &lt;code&gt;【有效期: xxx】&lt;/code&gt; 这种机械标注，自然融进正文——「30天」「白嫖一个月」「前1万名」「长期有效」。&lt;/p&gt;
+&lt;h3&gt;图片处理&lt;a href=&quot;#图片处理&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;推送时最多带一张图，优先级：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;频道真图&lt;/strong&gt;（RSS blockquote 里的论坛 OG 预览不算）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;论坛首楼正文图&lt;/strong&gt;（下载后检查尺寸，丢弃 logo/头像/小图标）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;产品页首屏截图&lt;/strong&gt;（无图但有 product_url 时，Playwright headless 截图 1280×900 @2x）&lt;/li&gt;
+&lt;li&gt;都没有 → 纯文本&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;截图有个坑：最初用 &lt;code&gt;wait_until=networkidle&lt;/code&gt;，结果阿里云那种 SPA 页背景请求不停，30s 超时白推纯文本。后来改成 &lt;code&gt;load → domcontentloaded → commit&lt;/code&gt; 降级 + 4s settle，10s 内出图。&lt;/p&gt;
+&lt;h2&gt;部署&lt;a href=&quot;#部署&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;# cron，每 15 分钟&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;*&lt;/span&gt;&lt;span&gt;/15 &lt;/span&gt;&lt;span&gt;*&lt;/span&gt;&lt;span&gt; *&lt;/span&gt;&lt;span&gt; *&lt;/span&gt;&lt;span&gt; *&lt;/span&gt;&lt;span&gt; /bin/bash /root/tg-ai-monitor/run_cron.sh&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;run_cron.sh&lt;/code&gt; 带 &lt;code&gt;flock&lt;/code&gt; 防并发，日志写 &lt;code&gt;data/cron.log&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;LLM 走自己的 CPA 网关，模型用 &lt;code&gt;agnes-2.0-flash&lt;/code&gt;（免费），4 次 LLM 调用/条 × 通常 ≤5 条/轮，成本可忽略。&lt;/p&gt;
+&lt;h2&gt;效果&lt;a href=&quot;#效果&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;跑了一阵，推送到自己的频道。典型推送长这样：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;注册送$40 AI + $360 VPS，支持Claude 4.6和GPT 5.2。单邮箱可无限注册。&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;http://signup.snowflake.com/cortex-code&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;#ai #白嫖&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;或者：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span&gt;&lt;span&gt;阿里云西湖论剑比赛，学生可领专属代金券，用于购买服务器和算力。&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;https://university.aliyun.com/action/dasctf&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;&lt;/span&gt;&lt;/span&gt;
+&lt;span&gt;&lt;span&gt;#ai #白嫖&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;短、直接、有链接有图。不写说明书腔，不标 ⏱ 有效期。&lt;/p&gt;
+&lt;h2&gt;一些踩过的坑&lt;a href=&quot;#一些踩过的坑&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;坑&lt;/th&gt;&lt;th&gt;原因&lt;/th&gt;&lt;th&gt;解法&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;推了论坛 OG logo 当正文图&lt;/td&gt;&lt;td&gt;RSS 把论坛链接预览图放 blockquote 里&lt;/td&gt;&lt;td&gt;&lt;code&gt;strip_blockquote=True&lt;/code&gt;；下载后尺寸校验丢弃小图&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;强行挂了无关产品链&lt;/td&gt;&lt;td&gt;NodeLoc 整页扫链扫到站点 &lt;code&gt;community_rules&lt;/code&gt;&lt;/td&gt;&lt;td&gt;改成只扫首楼正文，不扫整页&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;截图超时纯文本推送&lt;/td&gt;&lt;td&gt;&lt;code&gt;networkidle&lt;/code&gt; 对 SPA 永远不 settle&lt;/td&gt;&lt;td&gt;降级为 &lt;code&gt;load&lt;/code&gt; + &lt;code&gt;domcontentloaded&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;LLM 把有效期标成 &lt;code&gt;【有效期: xxx】&lt;/code&gt;&lt;/td&gt;&lt;td&gt;publish prompt 没限制格式&lt;/td&gt;&lt;td&gt;要求口语化融入正文，禁机械标注&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;同一产品两个频道各推一次&lt;/td&gt;&lt;td&gt;无跨频道去重&lt;/td&gt;&lt;td&gt;&lt;code&gt;dedupe_keys&lt;/code&gt; 表，key 基于 product host&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;h2&gt;小结&lt;a href=&quot;#小结&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;这东西本质是一个 &lt;strong&gt;LLM 驱动的 pipeline&lt;/strong&gt;：拉消息 → 过滤 → 抓详情 → 再过滤 → 改写 → 推送。每一步都有明确的丢弃条件，AI 负责判断，不负责编造。&lt;/p&gt;
+&lt;p&gt;代码没开源——环境太特殊，泛用性不够。思路倒是通用的：RSSHub + SQLite + 任意 LLM API + Bot Token，谁都能搭。&lt;/p&gt;
+&lt;p&gt;如果你也在刷 AI 羊毛频道，不妨试试让 Agent 替你刷。省下来的时间，可以用来薅更多的羊毛。&lt;/p&gt;</content:encoded><category>category:笔记</category><category>tag:Telegram</category><category>tag:AI</category><category>tag:LLM</category><category>tag:自动化</category><category>tag:RSSHub</category></item><item><title>给 Hermes 装 RTK：终端输出瘦身，token 少烧一点</title><link>https://blog.xn--ug8h.eu.org/post/note/%E7%BB%99hermes%E8%A3%85rtk</link><guid isPermaLink="false">note/给hermes装rtk</guid><description>预编译要 GLIBC 2.39、本机只有 2.36 时源码编译；rtk init 对接插件；gateway 必须在会话外重启。</description><pubDate>Wed, 15 Jul 2026 15:59:00 GMT</pubDate><content:encoded>&lt;blockquote&gt;
 &lt;p&gt;能用 &amp;gt; 看起来能用。Agent 天天 &lt;code&gt;git status&lt;/code&gt;、&lt;code&gt;docker ps&lt;/code&gt;，上下文却被原始输出塞满——这种账，值得算一算。&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h2&gt;起因&lt;a href=&quot;#起因&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/h2&gt;
